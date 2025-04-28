@@ -46,7 +46,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
   const disabledDate = (current: Dayjs) => {
     const today = dayjs().startOf("day");
     const minDate = today.add(3, "day");
-    const maxDate = today.add(7, "day");
+    const maxDate = today.add(6, "day");
     return current && (current < minDate || current > maxDate);
   };
 
@@ -191,7 +191,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
         <div style={{ marginBottom: 16 }}>
           <Text type="secondary">
             Доступные даты: от {dayjs().add(3, "day").format("DD.MM.YYYY")} до{" "}
-            {dayjs().add(7, "day").format("DD.MM.YYYY")}
+            {dayjs().add(6, "day").format("DD.MM.YYYY")}
           </Text>
         </div>
 
