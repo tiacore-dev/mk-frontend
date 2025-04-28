@@ -17,7 +17,11 @@ import {
 } from "../../hooks/orders/useOrderMutations";
 import { toast } from "react-hot-toast";
 import dayjs, { Dayjs } from "dayjs";
-import { IOrderDetails, IOrderRequest } from "../../api/ordersApi";
+import {
+  IOrderDetails,
+  IOrderUpdateRequest,
+  ICreateOrderRequest,
+} from "../../api/ordersApi";
 
 const { Text } = Typography;
 
@@ -80,9 +84,6 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
 
   const handleSubmit = async () => {
     try {
-      const values = await form.validateFields();
-      const selectedDate = values.date;
-
       const products = Object.entries(quantities)
         .filter(([_, quantity]) => quantity > 0)
         .map(([id, qt]) => ({
@@ -95,12 +96,10 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
         return;
       }
 
-      const orderData: IOrderRequest = {
-        date: selectedDate.format("YYYY-MM-DDTHH:mm:ss"),
-        products,
-      };
-
       if (isEditMode) {
+        const orderData: IOrderUpdateRequest = {
+          products,
+        };
         updateMutation.mutate(orderData, {
           onSuccess: () => {
             onSuccess();
@@ -109,6 +108,15 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
           },
         });
       } else {
+        // Для создания заявки все еще нужна дата
+        const values = await form.validateFields();
+        const selectedDate = values.date;
+
+        const orderData: ICreateOrderRequest = {
+          date: selectedDate.format("YYYY-MM-DDTHH:mm:ss"),
+          products,
+        };
+
         createMutation.mutate(orderData, {
           onSuccess: () => {
             onSuccess();
@@ -125,11 +133,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
   useEffect(() => {
     if (visible) {
       if (isEditMode && order) {
-        // Заполняем форму данными для редактирования
-        form.setFieldsValue({
-          date: dayjs(order.date),
-        });
-
+        // Для редактирования не устанавливаем дату в форму
         const initialQuantities: Record<string, number> = {};
         order.products.forEach((product) => {
           initialQuantities[product.id] = parseInt(product.qt) || 0;
@@ -150,6 +154,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
           initialQuantities[product.id] = 0;
         });
         setQuantities(initialQuantities);
+        form.resetFields(); // Сбрасываем форму, включая дату
       }
     }
   }, [visible, productsData, order, isEditMode, form]);
@@ -163,12 +168,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
         <Button key="back" onClick={onCancel}>
           Отмена
         </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          //   loading={createMutation.isLoading || updateMutation.isLoading}
-          onClick={handleSubmit}
-        >
+        <Button key="submit" type="primary" onClick={handleSubmit}>
           {isEditMode ? "Сохранить изменения" : "Создать заявку"}
         </Button>,
       ]}
@@ -176,24 +176,28 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
       destroyOnClose
     >
       <Form form={form} layout="vertical">
-        <Form.Item
-          label="Дата доставки"
-          name="date"
-          rules={[{ required: true, message: "Пожалуйста, выберите дату" }]}
-        >
-          <DatePicker
-            style={{ width: "100%" }}
-            disabledDate={disabledDate}
-            placeholder="Выберите дату"
-          />
-        </Form.Item>
+        {!isEditMode && (
+          <>
+            <Form.Item
+              label="Дата доставки"
+              name="date"
+              rules={[{ required: true, message: "Пожалуйста, выберите дату" }]}
+            >
+              <DatePicker
+                style={{ width: "100%" }}
+                disabledDate={disabledDate}
+                placeholder="Выберите дату"
+              />
+            </Form.Item>
 
-        <div style={{ marginBottom: 16 }}>
-          <Text type="secondary">
-            Доступные даты: от {dayjs().add(3, "day").format("DD.MM.YYYY")} до{" "}
-            {dayjs().add(6, "day").format("DD.MM.YYYY")}
-          </Text>
-        </div>
+            <div style={{ marginBottom: 16 }}>
+              <Text type="secondary">
+                Доступные даты: от {dayjs().add(3, "day").format("DD.MM.YYYY")}{" "}
+                до {dayjs().add(6, "day").format("DD.MM.YYYY")}
+              </Text>
+            </div>
+          </>
+        )}
 
         <Spin spinning={isProductsLoading}>
           <Table

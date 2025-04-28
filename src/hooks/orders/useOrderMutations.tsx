@@ -1,5 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createOrder, IOrderRequest, updateOrder } from "../../api/ordersApi";
+import {
+  createOrder,
+  ICreateOrderRequest,
+  updateOrder,
+  IOrderUpdateRequest,
+} from "../../api/ordersApi";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 
@@ -7,7 +12,7 @@ export const useCreateOrderMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (orderData: IOrderRequest) => createOrder(orderData),
+    mutationFn: (orderData: ICreateOrderRequest) => createOrder(orderData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       toast.success("Заявка успешно создана");
@@ -22,7 +27,7 @@ export const useUpdateOrderMutation = (id: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (orderData: IOrderRequest) => updateOrder(id, orderData),
+    mutationFn: (orderData: IOrderUpdateRequest) => updateOrder(id, orderData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orderDetails", id] });
       toast.success("Заявка успешно обновлена");

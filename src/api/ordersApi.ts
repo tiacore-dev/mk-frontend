@@ -56,7 +56,7 @@ export const fetchOrderDetails = async (id: string): Promise<IOrderDetails> => {
   });
   return response.data;
 };
-export interface IOrderRequest {
+export interface ICreateOrderRequest {
   date: string; // Формат: "YYYY-MM-DDTHH:mm:ss"
   products: Array<{
     id: string;
@@ -64,7 +64,7 @@ export interface IOrderRequest {
   }>;
 }
 export const createOrder = async (
-  orderData: IOrderRequest
+  orderData: ICreateOrderRequest
 ): Promise<{ success: boolean }> => {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
@@ -78,24 +78,34 @@ export const createOrder = async (
 
   return response.data;
 };
-
+export interface IOrderUpdateRequest {
+  products: Array<{
+    id: string;
+    qt: number;
+  }>;
+}
 export const updateOrder = async (
   id: string,
-  orderData: IOrderRequest
+  orderData: IOrderUpdateRequest
 ): Promise<{ success: boolean }> => {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
-  const response = await axiosInstance.patch(
-    `${url}order/${id}/edit`,
-    orderData,
-    {
-      headers: {
-        token: token,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  return response.data;
+  try {
+    const response = await axiosInstance.patch(
+      `${url}order/${id}/edit`,
+      orderData,
+      {
+        headers: {
+          token: token,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    // console.error("Error updating order:", error);
+    throw error;
+  }
 };
