@@ -99,6 +99,7 @@ export const OrderDetailsPage: React.FC = () => {
                 >
                   <Button
                     onClick={handleBack}
+                    // type="primary"
                     style={{
                       marginRight: 16,
                       marginTop: 24,

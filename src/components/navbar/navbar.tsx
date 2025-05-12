@@ -31,11 +31,20 @@ export const Navbar: React.FC = () => {
     navigate(e.key);
   };
 
+  const getSelectedKeys = () => {
+    const currentPath = location.pathname;
+    const selectedItem = menuItems.find(
+      (item) => item?.key && currentPath.startsWith(item.key as string)
+    );
+
+    return selectedItem ? [selectedItem.key as string] : [];
+  };
+
   return (
     <div className="navbar">
       <Menu
         mode="horizontal"
-        selectedKeys={[location.pathname]}
+        selectedKeys={getSelectedKeys()}
         items={menuItems}
         onClick={onMenuClick}
         style={{

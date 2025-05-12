@@ -92,34 +92,3 @@ export const acceptMovement = async (
     throw error;
   }
 };
-
-// export interface IOrderUpdateRequest {
-//   products: Array<{
-//     id: string;
-//     qt: number;
-//   }>;
-// }
-// export const updateOrder = async (
-//   id: string,
-//   orderData: IOrderUpdateRequest
-// ): Promise<{ success: boolean }> => {
-//   const url = process.env.REACT_APP_API_URL;
-//   const token = localStorage.getItem("token");
-//   // const token = localStorage.getItem("token");
-
-//   try {
-//     const response = await axiosInstance.patch(
-//       `${url}order/${id}/edit`,
-//       orderData,
-//       {
-//         headers: {
-//           token: token,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };

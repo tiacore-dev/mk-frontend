@@ -92,12 +92,6 @@ export const MovementsPage: React.FC = () => {
         />
       </Spin>
 
-      {/* <OrderFormModal
-        visible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        onSuccess={() => setIsModalVisible(false)}
-      /> */}
-
       {isError && (
         <Alert
           message="Ошибка"

@@ -69,14 +69,12 @@ export const createOrder = async (
 ): Promise<{ success: boolean }> => {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
-
   const response = await axiosInstance.post(`${url}order/add`, orderData, {
     headers: {
       token: token,
       "Content-Type": "application/json",
     },
   });
-
   return response.data;
 };
 
@@ -92,8 +90,6 @@ export const updateOrder = async (
 ): Promise<{ success: boolean }> => {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
-  // const token = localStorage.getItem("token");
-
   try {
     const response = await axiosInstance.patch(
       `${url}order/${id}/edit`,
