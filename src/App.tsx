@@ -17,6 +17,7 @@ import { OrdersPage } from "./pages/ordersPage/ordersPage";
 import { OrderDetailsPage } from "./pages/ordersPage/orderDetailsPage";
 import { MovementsPage } from "./pages/movementsPage/movementsPage";
 import { MovementDetailsPage } from "./pages/movementsPage/movementDetailsPage";
+import { Toaster } from "react-hot-toast";
 
 dayjs.locale("ru");
 
@@ -38,6 +39,7 @@ const App: React.FC = () => {
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
         </Router>
+        <Toaster />
       </ConfigProvider>
     </QueryClientProvider>
   );
