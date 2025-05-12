@@ -5,6 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { useMovementsQuery } from "../../hooks/movements/useMovementsQuery";
 import { IMovement } from "../../api/movomentsApi";
 
+const STATUS_COLORS = {
+  Новое: "green",
+  "В работе": "cyan",
+  Завершено: "geekblue",
+  default: "blue",
+};
+
 export const MovementsPage: React.FC = () => {
   const navigate = useNavigate();
   const [pagination, setPagination] = React.useState({
@@ -38,18 +45,18 @@ export const MovementsPage: React.FC = () => {
       title: "Статус",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => <Tag color="blue">{status}</Tag>,
+      render: (status: string) => (
+        <Tag
+          color={
+            STATUS_COLORS[status as keyof typeof STATUS_COLORS] ||
+            STATUS_COLORS.default
+          }
+          style={{ fontSize: 14 }}
+        >
+          {status}
+        </Tag>
+      ),
     },
-    // {
-    //   title: "Заяква",
-    //   dataIndex: "order",
-    //   key: "order",
-    //   render: (_, record) => (
-    //     <Space size="middle">
-    //       <a onClick={() => navigate(`/orders/${record.order}`)}>Подробнее</a>
-    //     </Space>
-    //   ),
-    // },
   ];
 
   const handleTableChange = (pagination: any) => {

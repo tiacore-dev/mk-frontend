@@ -7,6 +7,14 @@ import { useNavigate } from "react-router-dom";
 import { OrderFormModal } from "./orderFormModal";
 import { PlusOutlined } from "@ant-design/icons";
 
+// Константа для цветов статусов
+const STATUS_COLORS = {
+  Новая: "green",
+  Перемещение: "cyan",
+  Принята: "geekblue",
+  default: "blue",
+};
+
 export const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const [pagination, setPagination] = React.useState({
@@ -41,7 +49,17 @@ export const OrdersPage: React.FC = () => {
       title: "Статус",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => <Tag color="blue">{status}</Tag>,
+      render: (status: string) => (
+        <Tag
+          color={
+            STATUS_COLORS[status as keyof typeof STATUS_COLORS] ||
+            STATUS_COLORS.default
+          }
+          style={{ fontSize: 14 }}
+        >
+          {status}
+        </Tag>
+      ),
     },
     {
       title: "Дата доставки",
@@ -63,7 +81,6 @@ export const OrdersPage: React.FC = () => {
       <div
         style={{
           display: "flex",
-          // justifyContent: "space-between",
           alignItems: "center",
         }}
       >

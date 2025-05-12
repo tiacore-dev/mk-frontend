@@ -136,6 +136,9 @@ export const MovementDetailsPage: React.FC = () => {
                     style={{
                       marginRight: 16,
                       marginTop: 24,
+                      border: 0,
+                      fontSize: 18,
+                      boxShadow: "none",
                     }}
                     icon={<ArrowLeftOutlined />}
                   ></Button>
@@ -151,7 +154,23 @@ export const MovementDetailsPage: React.FC = () => {
                   <Text strong>{movement.sender}</Text>
                 </Descriptions.Item>
                 <Descriptions.Item label="Статус">
-                  <Tag color="blue">{movement.status}</Tag>
+                  {movement.status === "Новое" ? (
+                    <Tag color="green" style={{ fontSize: 14 }}>
+                      {movement.status}
+                    </Tag>
+                  ) : movement.status === "В работе" ? (
+                    <Tag color="cyan" style={{ fontSize: 14 }}>
+                      {movement.status}
+                    </Tag>
+                  ) : movement.status === "Завершено" ? (
+                    <Tag color="geekblue" style={{ fontSize: 14 }}>
+                      {movement.status}
+                    </Tag>
+                  ) : (
+                    <Tag color="blue" style={{ fontSize: 14 }}>
+                      {movement.status}
+                    </Tag>
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Пользователь">
                   {movement.user}

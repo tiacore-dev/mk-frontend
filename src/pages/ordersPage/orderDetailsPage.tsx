@@ -99,10 +99,12 @@ export const OrderDetailsPage: React.FC = () => {
                 >
                   <Button
                     onClick={handleBack}
-                    // type="primary"
                     style={{
                       marginRight: 16,
                       marginTop: 24,
+                      border: 0,
+                      fontSize: 18,
+                      boxShadow: "none",
                     }}
                     icon={<ArrowLeftOutlined />}
                   ></Button>
@@ -123,7 +125,23 @@ export const OrderDetailsPage: React.FC = () => {
                   {order.user}
                 </Descriptions.Item>
                 <Descriptions.Item label="Статус">
-                  <Tag color="blue">{order.status}</Tag>
+                  {order.status === "Новая" ? (
+                    <Tag color="green" style={{ fontSize: 14 }}>
+                      {order.status}
+                    </Tag>
+                  ) : order.status === "Перемещение" ? (
+                    <Tag color="cyan" style={{ fontSize: 14 }}>
+                      {order.status}
+                    </Tag>
+                  ) : order.status === "Принята" ? (
+                    <Tag color="geekblue" style={{ fontSize: 14 }}>
+                      {order.status}
+                    </Tag>
+                  ) : (
+                    <Tag color="blue" style={{ fontSize: 14 }}>
+                      {order.status}
+                    </Tag>
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Дата доставки">
                   {new Date(order.delivery_date).toLocaleDateString()}
