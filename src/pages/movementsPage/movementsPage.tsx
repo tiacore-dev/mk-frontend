@@ -1,33 +1,30 @@
-import React, { useState } from "react";
-import { Table, Spin, Alert, Button, Tag } from "antd";
+import React from "react";
+import { Table, Spin, Alert, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { useOrdersQuery } from "../../hooks/orders/useOrderQuery";
-import { IOrder } from "../../api/ordersApi";
 import { useNavigate } from "react-router-dom";
-import { OrderFormModal } from "./orderFormModal";
-import { PlusOutlined } from "@ant-design/icons";
+import { useMovementsQuery } from "../../hooks/movements/useMovementsQuery";
+import { IMovement } from "../../api/movomentsApi";
 
-export const OrdersPage: React.FC = () => {
+export const MovementsPage: React.FC = () => {
   const navigate = useNavigate();
   const [pagination, setPagination] = React.useState({
     current: 1,
     pageSize: 10,
   });
-  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const { data, isLoading, isError, error } = useOrdersQuery({
+  const { data, isLoading, isError, error } = useMovementsQuery({
     limit: pagination.pageSize,
     offset: (pagination.current - 1) * pagination.pageSize,
   });
 
-  const columns: ColumnsType<IOrder> = [
+  const columns: ColumnsType<IMovement> = [
     {
-      title: "Производство",
-      dataIndex: "production",
-      key: "production",
+      title: "Производитель",
+      dataIndex: "sender",
+      key: "sender",
     },
     {
-      title: "Дата заявки",
+      title: "Дата приема",
       dataIndex: "date",
       key: "date",
       render: (date: string) => new Date(date).toLocaleDateString(),
@@ -43,12 +40,16 @@ export const OrdersPage: React.FC = () => {
       key: "status",
       render: (status: string) => <Tag color="blue">{status}</Tag>,
     },
-    {
-      title: "Дата доставки",
-      dataIndex: "delivery_date",
-      key: "delivery_date",
-      render: (date: string) => new Date(date).toLocaleDateString(),
-    },
+    // {
+    //   title: "Заяква",
+    //   dataIndex: "order",
+    //   key: "order",
+    //   render: (_, record) => (
+    //     <Space size="middle">
+    //       <a onClick={() => navigate(`/orders/${record.order}`)}>Подробнее</a>
+    //     </Space>
+    //   ),
+    // },
   ];
 
   const handleTableChange = (pagination: any) => {
@@ -63,19 +64,11 @@ export const OrdersPage: React.FC = () => {
       <div
         style={{
           display: "flex",
-          // justifyContent: "space-between",
+          justifyContent: "space-between",
           alignItems: "center",
         }}
       >
-        <h2>Список заявок</h2>
-        <Button
-          icon={<PlusOutlined />}
-          type="primary"
-          onClick={() => setIsModalVisible(true)}
-          style={{ marginLeft: 24, marginTop: 4 }}
-        >
-          Добавить заявку
-        </Button>
+        <h2>Список перемещений</h2>
       </div>
 
       <Spin spinning={isLoading}>
@@ -93,17 +86,17 @@ export const OrdersPage: React.FC = () => {
           onChange={handleTableChange}
           onRow={(record) => {
             return {
-              onClick: () => navigate(`/orders/${record.id}`),
+              onClick: () => navigate(`/movements/${record.id}`),
             };
           }}
         />
       </Spin>
 
-      <OrderFormModal
+      {/* <OrderFormModal
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         onSuccess={() => setIsModalVisible(false)}
-      />
+      /> */}
 
       {isError && (
         <Alert

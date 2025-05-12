@@ -16,7 +16,7 @@ const ProtectedRoute: React.FC = () => {
 
   return (
     <>
-      {/* <Navbar /> */}
+      <Navbar />
       <div className="main-content">
         {/* <Breadcrumbs /> */}
         <Outlet />

@@ -63,6 +63,7 @@ export interface ICreateOrderRequest {
     qt: number;
   }>;
 }
+
 export const createOrder = async (
   orderData: ICreateOrderRequest
 ): Promise<{ success: boolean }> => {
@@ -78,6 +79,7 @@ export const createOrder = async (
 
   return response.data;
 };
+
 export interface IOrderUpdateRequest {
   products: Array<{
     id: string;
@@ -105,7 +107,6 @@ export const updateOrder = async (
     );
     return response.data;
   } catch (error) {
-    // console.error("Error updating order:", error);
     throw error;
   }
 };
