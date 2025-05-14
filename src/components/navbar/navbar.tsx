@@ -1,8 +1,12 @@
 import React from "react";
-import { Menu } from "antd";
+import { Menu, Button } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { MenuProps } from "antd";
-import { FileTextOutlined, SwapOutlined } from "@ant-design/icons";
+import {
+  FileTextOutlined,
+  SwapOutlined,
+  LogoutOutlined,
+} from "@ant-design/icons";
 
 const menuItems: MenuProps["items"] = [
   {
@@ -31,6 +35,13 @@ export const Navbar: React.FC = () => {
     navigate(e.key);
   };
 
+  const handleLogout = () => {
+    // Очищаем LocalStorage
+    localStorage.clear();
+    // Перенаправляем на страницу входа
+    navigate("/login");
+  };
+
   const getSelectedKeys = () => {
     const currentPath = location.pathname;
     const selectedItem = menuItems.find(
@@ -41,7 +52,10 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <div className="navbar">
+    <div
+      className="navbar"
+      style={{ display: "flex", justifyContent: "space-between" }}
+    >
       <Menu
         mode="horizontal"
         selectedKeys={getSelectedKeys()}
@@ -56,6 +70,20 @@ export const Navbar: React.FC = () => {
           marginTop: 8,
         }}
       />
+      <Button
+        type="text"
+        danger
+        icon={<LogoutOutlined />}
+        onClick={handleLogout}
+        style={{
+          marginRight: 16,
+          marginTop: 8,
+          height: 46,
+          fontSize: 16,
+        }}
+      >
+        Выход
+      </Button>
     </div>
   );
 };
