@@ -18,6 +18,8 @@ import { OrderDetailsPage } from "./pages/ordersPage/orderDetailsPage";
 import { MovementsPage } from "./pages/movementsPage/movementsPage";
 import { MovementDetailsPage } from "./pages/movementsPage/movementDetailsPage";
 import { Toaster } from "react-hot-toast";
+import { themeConfig } from "./theme/themeConfig";
+import { BalancePage } from "./pages/balancePage/balancePage";
 
 dayjs.locale("ru");
 
@@ -26,20 +28,26 @@ const queryClient = new QueryClient();
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ConfigProvider locale={ru_RU}>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/orders/:id" element={<OrderDetailsPage />} />
-              <Route path="/movements" element={<MovementsPage />} />
-              <Route path="/movements/:id" element={<MovementDetailsPage />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        </Router>
-        <Toaster />
+      <ConfigProvider theme={themeConfig}>
+        <ConfigProvider locale={ru_RU}>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/orders/:id" element={<OrderDetailsPage />} />
+                <Route path="/movements" element={<MovementsPage />} />
+                <Route
+                  path="/movements/:id"
+                  element={<MovementDetailsPage />}
+                />
+                <Route path="/balance" element={<BalancePage />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/login" />} />
+            </Routes>
+          </Router>
+          <Toaster />
+        </ConfigProvider>
       </ConfigProvider>
     </QueryClientProvider>
   );

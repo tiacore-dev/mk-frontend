@@ -32,7 +32,7 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
-    const originalRequest = error.config;
+    // const originalRequest = error.config;
 
     // Логирование ошибки
     console.error("[Axios Response Error]", {

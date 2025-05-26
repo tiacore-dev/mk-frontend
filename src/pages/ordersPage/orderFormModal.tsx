@@ -8,7 +8,6 @@ import {
   Form,
   Button,
   Spin,
-  Tag,
 } from "antd";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import {

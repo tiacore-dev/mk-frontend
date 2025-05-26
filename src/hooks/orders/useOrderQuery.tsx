@@ -1,9 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  IOrderResponse,
-  fetchOrderDetails,
-  fetchOrders,
-} from "../../api/ordersApi";
+import { fetchOrderDetails, fetchOrders } from "../../api/ordersApi";
 
 export interface IOrdersQueryParams {
   limit: number;
