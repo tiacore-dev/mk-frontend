@@ -34,6 +34,7 @@ interface TableDataItem {
   total: number;
   items: IBalanceItem[];
   hasBalance: boolean;
+  initialSold: number; // Добавляем поле для хранения изначально проданного количества
 }
 
 export const BalancePage: React.FC = () => {
@@ -58,6 +59,7 @@ export const BalancePage: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editableItems, setEditableItems] = useState<IBalanceItem[]>([]);
   const [originalItems, setOriginalItems] = useState<IBalanceItem[]>([]);
+  const [initialSold, setInitialSold] = useState(0); // Сохраняем изначальное проданное количество
   const changeBalanceMutation = useChangeBalanceMutation();
 
   const productMap = useMemo(() => {
@@ -66,10 +68,25 @@ export const BalancePage: React.FC = () => {
 
   const { groupedData, tableData } = useMemo(() => {
     const grouped = balanceData.reduce(
-      (acc: Record<string, { total: number; items: IBalanceItem[] }>, item) => {
-        if (!acc[item.product]) acc[item.product] = { total: 0, items: [] };
-        acc[item.product].total += item.qt;
-        acc[item.product].items.push({ ...item });
+      (
+        acc: Record<
+          string,
+          { total: number; items: IBalanceItem[]; initialSold: number }
+        >,
+        item
+      ) => {
+        if (!acc[item.product])
+          acc[item.product] = { total: 0, items: [], initialSold: 0 };
+
+        if (item.date === null) {
+          // Запись с date: null - это изначально проданное количество
+          acc[item.product].initialSold = Math.abs(item.qt);
+          acc[item.product].total += item.qt;
+        } else {
+          // Обычная запись с датой
+          acc[item.product].total += item.qt;
+          acc[item.product].items.push({ ...item });
+        }
         return acc;
       },
       {}
@@ -77,7 +94,11 @@ export const BalancePage: React.FC = () => {
 
     const allProductsData = products.map((product) => {
       const productId = product.id;
-      const balanceInfo = grouped[productId] || { total: 0, items: [] };
+      const balanceInfo = grouped[productId] || {
+        total: 0,
+        items: [],
+        initialSold: 0,
+      };
 
       return {
         key: productId,
@@ -85,7 +106,8 @@ export const BalancePage: React.FC = () => {
         product: product.name,
         total: balanceInfo.total,
         items: balanceInfo.items,
-        hasBalance: balanceInfo.items.length > 0,
+        initialSold: balanceInfo.initialSold,
+        hasBalance: balanceInfo.items.length > 0 || balanceInfo.initialSold > 0,
       };
     });
 
@@ -97,9 +119,11 @@ export const BalancePage: React.FC = () => {
 
   const openEditModal = (productId: string) => {
     const items = groupedData[productId]?.items || [];
+    const sold = groupedData[productId]?.initialSold || 0;
     setSelectedProductId(productId);
     setOriginalItems(items.map((item) => ({ ...item })));
     setEditableItems(items.map((item) => ({ ...item })));
+    setInitialSold(sold);
     setIsModalVisible(true);
   };
 
@@ -140,6 +164,15 @@ export const BalancePage: React.FC = () => {
       );
       return edited ? { ...edited } : item;
     });
+
+    // Добавляем запись о проданном количестве
+    if (initialSold > 0) {
+      updatedData.push({
+        product: selectedProductId,
+        date: null,
+        qt: -getTotalReduction(),
+      });
+    }
 
     changeBalanceMutation.mutate(updatedData, {
       onSuccess: () => {
@@ -235,6 +268,7 @@ export const BalancePage: React.FC = () => {
   const isError = isBalanceError || isProductsError;
   const error = balanceError || productsError;
   const totalReduction = getTotalReduction();
+  const isSaveDisabled = initialSold > 0 && totalReduction !== initialSold;
 
   return (
     <div style={{ padding: "24px" }}>
@@ -283,7 +317,21 @@ export const BalancePage: React.FC = () => {
           >
             <div style={{ color: "#000000", fontSize: 16 }}>
               Реализовано:{" "}
-              <span style={{ fontWeight: 400 }}>{totalReduction}</span>
+              <span style={{ fontWeight: 400 }}>
+                {totalReduction} из {initialSold}
+              </span>
+              {initialSold > 0 && (
+                <span
+                  style={{
+                    color: isSaveDisabled ? "#ff4d4f" : "#52c41a",
+                    marginLeft: 8,
+                  }}
+                >
+                  {/* {isSaveDisabled
+                    ? "Необходимо реализовать все"
+                    : "Готово к сохранению"} */}
+                </span>
+              )}
             </div>
             <Space>
               <Tooltip title="Отменить все изменения">
@@ -307,7 +355,7 @@ export const BalancePage: React.FC = () => {
                 icon={<SaveOutlined />}
                 disabled={
                   JSON.stringify(editableItems) ===
-                  JSON.stringify(originalItems)
+                    JSON.stringify(originalItems) || isSaveDisabled
                 }
               >
                 Сохранить

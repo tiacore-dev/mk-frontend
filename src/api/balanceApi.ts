@@ -3,7 +3,7 @@ import { axiosInstance } from "../axiosConfig";
 
 export interface IBalanceItem {
   product: string;
-  date: string;
+  date: string | null;
   qt: number;
 }
 
