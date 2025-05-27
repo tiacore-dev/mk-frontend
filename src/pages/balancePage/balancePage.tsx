@@ -111,6 +111,12 @@ export const BalancePage: React.FC = () => {
       };
     });
 
+    allProductsData.sort((a, b) => {
+      const aEditable = a.initialSold > 0 ? 1 : 0;
+      const bEditable = b.initialSold > 0 ? 1 : 0;
+      return bEditable - aEditable;
+    });
+
     return {
       groupedData: grouped,
       tableData: allProductsData,
@@ -188,9 +194,6 @@ export const BalancePage: React.FC = () => {
       title: "Общее количество",
       dataIndex: "total",
       key: "total",
-      sorter: (a, b) => a.total - b.total,
-      sortDirections: ["ascend", "descend"] as SortOrder[],
-      defaultSortOrder: "descend" as SortOrder,
       render: (total: number, record: TableDataItem) => (
         <span style={{ color: record.hasBalance ? undefined : "#999" }}>
           {total || "0"}
@@ -206,7 +209,7 @@ export const BalancePage: React.FC = () => {
           type="link"
           icon={<EditOutlined />}
           onClick={() => openEditModal(record.productId)}
-          disabled={!record.hasBalance}
+          disabled={record.initialSold <= 0}
         />
       ),
     },
@@ -317,7 +320,13 @@ export const BalancePage: React.FC = () => {
           >
             <div style={{ color: "#000000", fontSize: 16 }}>
               Реализовано:{" "}
-              <span style={{ fontWeight: 400 }}>
+              <span
+                style={{
+                  fontWeight: 400,
+                  color: totalReduction > initialSold ? "#ff4d4f" : "inherit", // Красный если X > Y
+                }}
+              >
+                {" "}
                 {totalReduction} из {initialSold}
               </span>
               {initialSold > 0 && (
@@ -347,19 +356,38 @@ export const BalancePage: React.FC = () => {
                   Сбросить
                 </Button>
               </Tooltip>
-              <Button
-                key="save"
-                type="primary"
-                loading={changeBalanceMutation.isPending}
-                onClick={handleSave}
-                icon={<SaveOutlined />}
-                disabled={
-                  JSON.stringify(editableItems) ===
-                    JSON.stringify(originalItems) || isSaveDisabled
-                }
-              >
-                Сохранить
-              </Button>
+              {JSON.stringify(editableItems) ===
+                JSON.stringify(originalItems) || isSaveDisabled ? (
+                <Tooltip title="Необходимо реализовать все">
+                  <Button
+                    key="save"
+                    type="primary"
+                    loading={changeBalanceMutation.isPending}
+                    onClick={handleSave}
+                    icon={<SaveOutlined />}
+                    disabled={
+                      JSON.stringify(editableItems) ===
+                        JSON.stringify(originalItems) || isSaveDisabled
+                    }
+                  >
+                    Сохранить
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Button
+                  key="save"
+                  type="primary"
+                  loading={changeBalanceMutation.isPending}
+                  onClick={handleSave}
+                  icon={<SaveOutlined />}
+                  disabled={
+                    JSON.stringify(editableItems) ===
+                      JSON.stringify(originalItems) || isSaveDisabled
+                  }
+                >
+                  Сохранить
+                </Button>
+              )}
               <Button
                 key="cancel"
                 onClick={() => setIsModalVisible(false)}

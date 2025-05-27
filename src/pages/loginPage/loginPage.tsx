@@ -39,7 +39,7 @@ export const LoginPage: React.FC = () => {
           >
             <Typography.Title
               level={2}
-              style={{ textAlign: "center", marginBottom: 24 }}
+              style={{ textAlign: "center", marginBottom: 24, marginTop: -48 }}
             >
               Вход в систему
             </Typography.Title>
