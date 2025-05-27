@@ -111,7 +111,8 @@ export const BalancePage: React.FC = () => {
   };
 
   const updateQuantity = (index: number, newValue: number) => {
-    const clampedValue = Math.max(0, newValue);
+    const originalValue = originalItems[index]?.qt || 0;
+    const clampedValue = Math.max(0, Math.min(newValue, originalValue));
     setEditableItems((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], qt: clampedValue };
@@ -204,6 +205,7 @@ export const BalancePage: React.FC = () => {
             />
             <InputNumber
               min={0}
+              max={originalValue}
               value={value}
               onChange={(val) => handleInputChange(val, index)}
               style={{ width: 80 }}
@@ -212,6 +214,7 @@ export const BalancePage: React.FC = () => {
               icon={<PlusOutlined />}
               onClick={() => handlePlus(index)}
               size="small"
+              disabled={value >= originalValue}
             />
             {difference !== 0 && (
               <>
