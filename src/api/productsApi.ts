@@ -8,7 +8,7 @@ export interface IProductResponse {
 export const fetchProducts = async (): Promise<IProductResponse[]> => {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
-  const response = await axiosInstance.get(`${url}/products/all`, {
+  const response = await axiosInstance.get(`${url}products/all`, {
     headers: {
       token: token,
       "Content-Type": "application/json",

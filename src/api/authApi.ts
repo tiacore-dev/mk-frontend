@@ -11,7 +11,7 @@ export const loginUser = async (
   }
 
   const response = await axiosInstance.post<ILoginResponse>(
-    `${url}/auth/login`,
+    `${url}auth/login`,
     data
   );
   return response.data;
