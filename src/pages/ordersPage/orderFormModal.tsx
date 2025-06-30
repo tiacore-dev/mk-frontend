@@ -24,6 +24,9 @@ import {
 
 const { Text } = Typography;
 
+// Константа для формата даты
+const DATE_FORMAT = "DD.MM.YYYY";
+
 interface IOrderFormModalProps {
   visible: boolean;
   onCancel: () => void;
@@ -186,13 +189,14 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
                 style={{ width: "100%" }}
                 disabledDate={disabledDate}
                 placeholder="Выберите дату"
+                format={DATE_FORMAT}
               />
             </Form.Item>
 
             <div style={{ marginBottom: 16 }}>
               <Text type="secondary">
-                Доступные даты: от {dayjs().add(3, "day").format("DD.MM.YYYY")}{" "}
-                до {dayjs().add(6, "day").format("DD.MM.YYYY")}
+                Доступные даты: от {dayjs().add(3, "day").format(DATE_FORMAT)}{" "}
+                до {dayjs().add(6, "day").format(DATE_FORMAT)}
               </Text>
             </div>
           </>
