@@ -168,7 +168,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
           Отмена
         </Button>,
         <Button key="submit" type="primary" onClick={handleSubmit}>
-          {isEditMode ? "Сохранить изменения" : "Создать заявку"}
+          {isEditMode ? "Сохранить изменения" : "Сохранить заявку"}
         </Button>,
       ]}
       width={800}
@@ -178,7 +178,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
         {!isEditMode && (
           <>
             <Form.Item
-              label="Дата доставки"
+              label="Дата перемещения"
               name="date"
               rules={[{ required: true, message: "Пожалуйста, выберите дату" }]}
             >

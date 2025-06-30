@@ -143,7 +143,7 @@ export const OrderDetailsPage: React.FC = () => {
                     </Tag>
                   )}
                 </Descriptions.Item>
-                <Descriptions.Item label="Дата доставки">
+                <Descriptions.Item label="Дата перемещения">
                   {new Date(order.delivery_date).toLocaleDateString()}
                 </Descriptions.Item>
               </Descriptions>

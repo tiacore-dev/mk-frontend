@@ -62,7 +62,7 @@ export const OrdersPage: React.FC = () => {
       ),
     },
     {
-      title: "Дата доставки",
+      title: "Дата перемещения",
       dataIndex: "delivery_date",
       key: "delivery_date",
       render: (date: string) => new Date(date).toLocaleDateString(),
