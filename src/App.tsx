@@ -20,6 +20,8 @@ import { MovementDetailsPage } from "./pages/movementsPage/movementDetailsPage";
 import { Toaster } from "react-hot-toast";
 import { themeConfig } from "./theme/themeConfig";
 import { BalancePage } from "./pages/balancePage/balancePage";
+import { WriteOffsPage } from "./pages/writeOffsPage/writeOffsPage";
+import { WriteOffDetailsPage } from "./pages/writeOffsPage/writeOffDetailsPage";
 
 dayjs.locale("ru");
 
@@ -35,6 +37,12 @@ const App: React.FC = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/write_offs" element={<WriteOffsPage />} />
+                <Route
+                  path="/write_offs/:id"
+                  element={<WriteOffDetailsPage />}
+                />
+
                 <Route path="/orders/:id" element={<OrderDetailsPage />} />
                 <Route path="/movements" element={<MovementsPage />} />
                 <Route

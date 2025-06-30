@@ -39,10 +39,3 @@ export const changeBalance = async (
   );
   return response.data;
 };
-// export const changeBalance = async (
-//   balanceData: IBalanceItem[]
-// ): Promise<IBalanceItem[]> => {
-//   console.log("!!!!!!!!!!!!!!", balanceData);
-
-//   return balanceData;
-// };

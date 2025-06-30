@@ -7,6 +7,7 @@ import {
   SwapOutlined,
   LogoutOutlined,
   ShoppingCartOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 
 import logo from "../../logo.png";
@@ -35,6 +36,15 @@ const menuItems: MenuProps["items"] = [
       </>
     ),
     key: "/balance",
+  },
+
+  {
+    label: (
+      <>
+        <EditOutlined /> Списания
+      </>
+    ),
+    key: "/write_offs",
   },
 ];
 
