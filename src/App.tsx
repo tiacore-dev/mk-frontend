@@ -32,7 +32,7 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <ConfigProvider theme={themeConfig}>
         <ConfigProvider locale={ru_RU}>
-          <Router>
+          <Router basename="/client">
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route element={<ProtectedRoute />}>
