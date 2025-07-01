@@ -13,11 +13,16 @@ import {
 } from "antd";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import { useBalanceQuery } from "../../hooks/balance/useBalanceQuery";
-import { useCreateWriteOffMutation } from "../../hooks/writeOffs/useWriteOffMutations";
-import { useWriteOffDetailsQuery } from "../../hooks/writeOffs/useWriteOffsQuery";
+import {
+  useCreateWriteOffMutation,
+  useUpdateWriteOffMutation,
+} from "../../hooks/writeOffs/useWriteOffMutations";
 import { toast } from "react-hot-toast";
 import dayjs from "dayjs";
-import { ICreateWriteOffsRequest } from "../../api/writeOffsApi";
+import {
+  ICreateWriteOffsRequest,
+  IWriteOffUpdateRequest,
+} from "../../api/writeOffsApi";
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -41,7 +46,9 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
   const { data: productsData, isLoading: isProductsLoading } =
     useProductsQuery();
   const { data: balanceData, isLoading: isBalanceLoading } = useBalanceQuery();
+
   const createMutation = useCreateWriteOffMutation();
+  const updateMutation = useUpdateWriteOffMutation(write_off?.id);
 
   const isEditMode = !!write_off;
 
@@ -66,6 +73,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
       new Date(current) < new Date(oldest) ? current : oldest
     );
   };
+
   const handleQuantityChange = (productId: string, value: number) => {
     const newQuantities = { ...quantities, [productId]: value };
     setQuantities(newQuantities);
@@ -86,7 +94,6 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
         });
       }
     } else {
-      // Если количество 0, удаляем дату из состояния
       setProductDates((prev) => {
         const newDates = { ...prev };
         delete newDates[productId];
@@ -184,20 +191,35 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
 
       const values = await form.validateFields();
 
-      const writeOffData: ICreateWriteOffsRequest = {
-        date: values.date.format("YYYY-MM-DDTHH:mm:ss"),
-        description: values.description,
-        products,
-      };
+      if (isEditMode) {
+        // Режим редактирования
+        const writeOffData: IWriteOffUpdateRequest = { products };
+        updateMutation.mutate(writeOffData, {
+          onSuccess: () => {
+            onSuccess();
+            form.resetFields();
+            setQuantities({});
+            setProductDates({});
+          },
+        });
+      } else {
+        // Режим создания
+        const formattedDate = values.date?.format("YYYY-MM-DDTHH:mm:ss");
+        const writeOffData: ICreateWriteOffsRequest = {
+          date: formattedDate,
+          description: values.description,
+          products,
+        };
 
-      createMutation.mutate(writeOffData, {
-        onSuccess: () => {
-          onSuccess();
-          form.resetFields();
-          setQuantities({});
-          setProductDates({});
-        },
-      });
+        createMutation.mutate(writeOffData, {
+          onSuccess: () => {
+            onSuccess();
+            form.resetFields();
+            setQuantities({});
+            setProductDates({});
+          },
+        });
+      }
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -226,6 +248,11 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
 
         setQuantities(initialQuantities);
         setProductDates(initialDates);
+
+        form.setFieldsValue({
+          date: write_off.date ? dayjs(write_off.date) : undefined,
+          description: write_off.description || "",
+        });
       } else if (productsData) {
         const initialQuantities: Record<string, number> = {};
         const initialDates: Record<string, string> = {};
@@ -258,6 +285,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
           key="submit"
           type="primary"
           onClick={handleSubmit}
+          loading={createMutation.isPending || updateMutation.isPending}
           // disabled={hasNegativeBalance}
         >
           {isEditMode ? "Сохранить изменения" : "Создать списание"}
@@ -277,7 +305,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
       )}
 
       <Form form={form} layout="vertical">
-        {!isEditMode && (
+        {!isEditMode ? (
           <>
             <Form.Item
               label="Дата списания"
@@ -288,6 +316,25 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
                 style={{ width: "100%" }}
                 placeholder="Выберите дату"
               />
+            </Form.Item>
+
+            <Form.Item
+              label="Описание"
+              name="description"
+              rules={[
+                { required: true, message: "Пожалуйста, введите описание" },
+              ]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Введите описание списания"
+              />
+            </Form.Item>
+          </>
+        ) : (
+          <>
+            <Form.Item label="Дата списания" name="date">
+              <DatePicker style={{ width: "100%" }} disabled />
             </Form.Item>
 
             <Form.Item

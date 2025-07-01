@@ -47,7 +47,7 @@ export const fetchWriteOffDetails = async (
 ): Promise<IWriteOffDetails> => {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
-  const response = await axiosInstance.get(`${url}writeoff/view/${id}`, {
+  const response = await axiosInstance.get(`${url}writeoff/${id}/view`, {
     headers: {
       token: token,
       "Content-Type": "application/json",

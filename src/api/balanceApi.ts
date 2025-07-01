@@ -27,8 +27,8 @@ export const changeBalance = async (
 ): Promise<IBalanceItem[]> => {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
-  const response = await axiosInstance.patch<IBalanceItem[]>(
-    `${url}balances/update`, // Обычно для обновления используется другой endpoint
+  const response = await axiosInstance.post<IBalanceItem[]>(
+    `${url}balances/set`, // Обычно для обновления используется другой endpoint
     balanceData, // Отправляем массив данных в теле запроса
     {
       headers: {
