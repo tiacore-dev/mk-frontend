@@ -433,7 +433,7 @@ export const BalancePage: React.FC = () => {
       </Modal>
 
       <Modal
-        title="Печать инвентаризации"
+        // title="Печать инвентаризации"
         open={isPrintModalVisible}
         onCancel={() => setIsPrintModalVisible(false)}
         width={800}

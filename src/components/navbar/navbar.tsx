@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, Button, Image } from "antd";
+import { Menu, Button, Image, Space, Typography } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { MenuProps } from "antd";
 import {
@@ -37,7 +37,6 @@ const menuItems: MenuProps["items"] = [
     ),
     key: "/balance",
   },
-
   {
     label: (
       <>
@@ -51,6 +50,11 @@ const menuItems: MenuProps["items"] = [
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Получаем данные пользователя из localStorage
+  const userData = localStorage.getItem("userData");
+  const fullName = userData ? JSON.parse(userData).fullName : "";
+  const address = userData ? JSON.parse(userData).address : "";
 
   const onMenuClick: MenuProps["onClick"] = (e) => {
     navigate(e.key);
@@ -75,10 +79,10 @@ export const Navbar: React.FC = () => {
       style={{
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center", // Выравниваем элементы по центру по вертикали
-        height: "64px", // Фиксированная высота навбара
-        padding: "0 16px", // Отступы слева и справа
-        backgroundColor: "#fff", // Фон навбара
+        alignItems: "center",
+        height: "64px",
+        padding: "0 16px",
+        backgroundColor: "#fff",
       }}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -87,9 +91,9 @@ export const Navbar: React.FC = () => {
           src={logo}
           preview={false}
           style={{
-            height: "84px", // Фиксированная высота логотипа
-            marginRight: "24px", // Отступ от меню
-            objectFit: "contain", // Сохраняем пропорции
+            height: "84px",
+            marginRight: "24px",
+            objectFit: "contain",
           }}
         />
 
@@ -100,26 +104,38 @@ export const Navbar: React.FC = () => {
           onClick={onMenuClick}
           style={{
             borderBottom: "none",
-            lineHeight: "64px", // Совпадает с высотой навбара
+            lineHeight: "64px",
             background: "transparent",
             fontSize: 16,
           }}
         />
       </div>
 
-      <Button
-        type="text"
-        danger
-        icon={<LogoutOutlined />}
-        onClick={handleLogout}
-        style={{
-          fontSize: 16,
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        Выход
-      </Button>
+      <Space align="center" size="middle">
+        {/* Отображаем полное имя пользователя */}
+        <Typography.Text
+          strong
+          style={{ color: "#005696", fontFamily: "system-ui" }}
+        >
+          {fullName}
+          {/* {"  |  "}
+          {address} */}
+        </Typography.Text>
+
+        <Button
+          type="text"
+          danger
+          icon={<LogoutOutlined />}
+          onClick={handleLogout}
+          style={{
+            fontSize: 16,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          Выход
+        </Button>
+      </Space>
     </div>
   );
 };
