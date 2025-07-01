@@ -9,13 +9,13 @@ import {
   Modal,
   InputNumber,
   Tooltip,
-  Tag,
   Spin,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useBalanceQuery } from "../../hooks/balance/useBalanceQuery";
 import {
   EditOutlined,
+  PrinterOutlined,
   PlusOutlined,
   MinusOutlined,
   UndoOutlined,
@@ -25,8 +25,7 @@ import {
 import { useChangeBalanceMutation } from "../../hooks/balance/useBalanseMutation";
 import { IBalanceItem } from "../../api/balanceApi";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
-import { SortOrder } from "antd/es/table/interface";
-import Item from "antd/es/list/Item";
+import { PrintInventory, printInventoryStyles } from "./printBalance";
 
 interface TableDataItem {
   key: string;
@@ -35,7 +34,7 @@ interface TableDataItem {
   total: number;
   items: IBalanceItem[];
   hasBalance: boolean;
-  initialSold: number; // Добавляем поле для хранения изначально проданного количества
+  initialSold: number;
 }
 
 export const BalancePage: React.FC = () => {
@@ -60,8 +59,12 @@ export const BalancePage: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editableItems, setEditableItems] = useState<IBalanceItem[]>([]);
   const [originalItems, setOriginalItems] = useState<IBalanceItem[]>([]);
-  const [initialSold, setInitialSold] = useState(0); // Сохраняем изначальное проданное количество
+  const [initialSold, setInitialSold] = useState(0);
+  const [isPrintModalVisible, setIsPrintModalVisible] = useState(false);
+  const [printData, setPrintData] = useState<TableDataItem[]>([]);
+
   const changeBalanceMutation = useChangeBalanceMutation();
+  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
   const productMap = useMemo(() => {
     return new Map(products.map((product) => [product.id, product.name]));
@@ -80,11 +83,9 @@ export const BalancePage: React.FC = () => {
           acc[item.product] = { total: 0, items: [], initialSold: 0 };
 
         if (item.date === null) {
-          // Запись с date: null - это изначально проданное количество
           acc[item.product].initialSold = Math.abs(item.qt);
           acc[item.product].total += item.qt;
         } else {
-          // Обычная запись с датой
           acc[item.product].total += item.qt;
           acc[item.product].items.push({ ...item });
         }
@@ -134,6 +135,55 @@ export const BalancePage: React.FC = () => {
     setIsModalVisible(true);
   };
 
+  const openPrintModal = () => {
+    setPrintData(tableData.filter((item) => item.hasBalance));
+    setIsPrintModalVisible(true);
+  };
+
+  const handlePrint = () => {
+    const printContent = document.getElementById("print-content");
+    if (!printContent) return;
+
+    const styles = printInventoryStyles;
+    const printWindow = document.createElement("iframe");
+
+    printWindow.style.position = "absolute";
+    printWindow.style.width = "0";
+    printWindow.style.height = "0";
+    printWindow.style.border = "none";
+    printWindow.style.left = "-9999px";
+
+    document.body.appendChild(printWindow);
+
+    const doc = printWindow.contentDocument;
+    if (doc) {
+      doc.open();
+      doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Печать инвентаризации</title>
+          <style>${styles}</style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+          <script>
+            setTimeout(function() {
+              window.print();
+              setTimeout(function() {
+                window.frameElement.parentNode.removeChild(window.frameElement);
+              }, 100);
+            }, 100);
+          </script>
+        </body>
+      </html>
+    `);
+      doc.close();
+    } else {
+      document.body.removeChild(printWindow);
+    }
+  };
+
   const getTotalReduction = () => {
     if (!selectedProductId) return 0;
     const originalTotal = originalItems.reduce((sum, item) => sum + item.qt, 0);
@@ -166,22 +216,13 @@ export const BalancePage: React.FC = () => {
     if (!selectedProductId) return;
 
     const updatedData = balanceData
-    .filter(item => item.product === selectedProductId && item.date)
-    .map((item) => {
-      const edited = editableItems.find(
-        (e) => e.product === item.product && e.date === item.date
-      );
-      return edited ? { ...edited } : item;
-    });
-
-    // Добавляем запись о проданном количестве
-    // if (initialSold > 0) {
-    //   updatedData.push({
-    //     product: selectedProductId,
-    //     date: null,
-    //     qt: -getTotalReduction(),
-    //   });
-    // }
+      .filter((item) => item.product === selectedProductId && item.date)
+      .map((item) => {
+        const edited = editableItems.find(
+          (e) => e.product === item.product && e.date === item.date
+        );
+        return edited ? { ...edited } : item;
+      });
 
     changeBalanceMutation.mutate(updatedData, {
       onSuccess: () => {
@@ -282,9 +323,18 @@ export const BalancePage: React.FC = () => {
         style={{
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 16,
         }}
       >
         <h2>Остатки</h2>
+        <Button
+          type="primary"
+          icon={<PrinterOutlined />}
+          onClick={openPrintModal}
+        >
+          Печать
+        </Button>
       </div>
 
       {isError && (
@@ -326,24 +376,12 @@ export const BalancePage: React.FC = () => {
               <span
                 style={{
                   fontWeight: 400,
-                  color: totalReduction > initialSold ? "#ff4d4f" : "inherit", // Красный если X > Y
+                  color: totalReduction > initialSold ? "#ff4d4f" : "inherit",
                 }}
               >
                 {" "}
                 {totalReduction} из {initialSold}
               </span>
-              {initialSold > 0 && (
-                <span
-                  style={{
-                    color: isSaveDisabled ? "#ff4d4f" : "#52c41a",
-                    marginLeft: 8,
-                  }}
-                >
-                  {/* {isSaveDisabled
-                    ? "Необходимо реализовать все"
-                    : "Готово к сохранению"} */}
-                </span>
-              )}
             </div>
             <Space>
               <Tooltip title="Отменить все изменения">
@@ -359,38 +397,19 @@ export const BalancePage: React.FC = () => {
                   Сбросить
                 </Button>
               </Tooltip>
-              {JSON.stringify(editableItems) ===
-                JSON.stringify(originalItems) || isSaveDisabled ? (
-                <Tooltip title="Необходимо реализовать все">
-                  <Button
-                    key="save"
-                    type="primary"
-                    loading={changeBalanceMutation.isPending}
-                    onClick={handleSave}
-                    icon={<SaveOutlined />}
-                    disabled={
-                      JSON.stringify(editableItems) ===
-                        JSON.stringify(originalItems) || isSaveDisabled
-                    }
-                  >
-                    Сохранить
-                  </Button>
-                </Tooltip>
-              ) : (
-                <Button
-                  key="save"
-                  type="primary"
-                  loading={changeBalanceMutation.isPending}
-                  onClick={handleSave}
-                  icon={<SaveOutlined />}
-                  disabled={
-                    JSON.stringify(editableItems) ===
-                      JSON.stringify(originalItems) || isSaveDisabled
-                  }
-                >
-                  Сохранить
-                </Button>
-              )}
+              <Button
+                key="save"
+                type="primary"
+                loading={changeBalanceMutation.isPending}
+                onClick={handleSave}
+                icon={<SaveOutlined />}
+                disabled={
+                  JSON.stringify(editableItems) ===
+                    JSON.stringify(originalItems) || isSaveDisabled
+                }
+              >
+                Сохранить
+              </Button>
               <Button
                 key="cancel"
                 onClick={() => setIsModalVisible(false)}
@@ -411,6 +430,28 @@ export const BalancePage: React.FC = () => {
           bordered
           size="middle"
         />
+      </Modal>
+
+      <Modal
+        title="Печать инвентаризации"
+        open={isPrintModalVisible}
+        onCancel={() => setIsPrintModalVisible(false)}
+        width={800}
+        footer={[
+          <Button key="cancel" onClick={() => setIsPrintModalVisible(false)}>
+            Отменить
+          </Button>,
+          <Button
+            key="print"
+            type="primary"
+            icon={<PrinterOutlined />}
+            onClick={handlePrint}
+          >
+            Печать
+          </Button>,
+        ]}
+      >
+        <PrintInventory data={printData} userData={userData} />
       </Modal>
     </div>
   );
