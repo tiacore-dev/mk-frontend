@@ -26,6 +26,7 @@ import { useChangeBalanceMutation } from "../../hooks/balance/useBalanseMutation
 import { IBalanceItem } from "../../api/balanceApi";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import { SortOrder } from "antd/es/table/interface";
+import Item from "antd/es/list/Item";
 
 interface TableDataItem {
   key: string;
@@ -164,7 +165,9 @@ export const BalancePage: React.FC = () => {
   const handleSave = () => {
     if (!selectedProductId) return;
 
-    const updatedData = balanceData.map((item) => {
+    const updatedData = balanceData
+    .filter(item => item.product === selectedProductId && item.date)
+    .map((item) => {
       const edited = editableItems.find(
         (e) => e.product === item.product && e.date === item.date
       );
@@ -172,13 +175,13 @@ export const BalancePage: React.FC = () => {
     });
 
     // Добавляем запись о проданном количестве
-    if (initialSold > 0) {
-      updatedData.push({
-        product: selectedProductId,
-        date: null,
-        qt: -getTotalReduction(),
-      });
-    }
+    // if (initialSold > 0) {
+    //   updatedData.push({
+    //     product: selectedProductId,
+    //     date: null,
+    //     qt: -getTotalReduction(),
+    //   });
+    // }
 
     changeBalanceMutation.mutate(updatedData, {
       onSuccess: () => {
