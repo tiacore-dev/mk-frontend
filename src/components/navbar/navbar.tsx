@@ -117,9 +117,7 @@ export const Navbar: React.FC = () => {
           strong
           style={{ color: "#005696", fontFamily: "system-ui" }}
         >
-          {fullName}
-          {/* {"  |  "}
-          {address} */}
+          {`${fullName} | ${address}`} 
         </Typography.Text>
 
         <Button
