@@ -8,6 +8,7 @@ import {
   LogoutOutlined,
   ShoppingCartOutlined,
   EditOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 
 import logo from "../../logo.png";
@@ -45,6 +46,14 @@ const menuItems: MenuProps["items"] = [
     ),
     key: "/write_offs",
   },
+  {
+    label: (
+      <>
+        <BarChartOutlined /> Отчеты(в разработке)
+      </>
+    ),
+    key: "/reports",
+  },
 ];
 
 export const Navbar: React.FC = () => {
@@ -81,11 +90,19 @@ export const Navbar: React.FC = () => {
         justifyContent: "space-between",
         alignItems: "center",
         height: "64px",
-        padding: "0 16px",
+        padding: "0 8px",
         backgroundColor: "#fff",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          flex: 1, // Занимаем все доступное пространство
+          minWidth: 0, // Важно для правильной работы flex
+        }}
+      >
+        {" "}
         {/* Логотип */}
         <Image
           src={logo}
@@ -94,9 +111,9 @@ export const Navbar: React.FC = () => {
             height: "84px",
             marginRight: "24px",
             objectFit: "contain",
+            flexShrink: 0, // Запрещаем сжатие логотипа
           }}
         />
-
         <Menu
           mode="horizontal"
           selectedKeys={getSelectedKeys()}
@@ -107,7 +124,12 @@ export const Navbar: React.FC = () => {
             lineHeight: "64px",
             background: "transparent",
             fontSize: 16,
+            flex: 1, // Добавляем это свойство
+            minWidth: 0, // Важно для правильной работы flex
+            overflow: "hidden", // Скрываем горизонтальный скролл
+            whiteSpace: "nowrap", // Запрещаем перенос текста
           }}
+          overflowedIndicator={null} // Убираем кнопку с многоточием
         />
       </div>
 
@@ -117,7 +139,7 @@ export const Navbar: React.FC = () => {
           strong
           style={{ color: "#005696", fontFamily: "system-ui" }}
         >
-          {`${fullName} | ${address}`} 
+          {`${fullName} | ${address}`}
         </Typography.Text>
 
         <Button

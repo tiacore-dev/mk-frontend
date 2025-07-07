@@ -22,6 +22,7 @@ import { themeConfig } from "./theme/themeConfig";
 import { BalancePage } from "./pages/balancePage/balancePage";
 import { WriteOffsPage } from "./pages/writeOffsPage/writeOffsPage";
 import { WriteOffDetailsPage } from "./pages/writeOffsPage/writeOffDetailsPage";
+import { ReportPage } from "./pages/reportPage/reportPage";
 
 dayjs.locale("ru");
 
@@ -50,6 +51,7 @@ const App: React.FC = () => {
                   element={<MovementDetailsPage />}
                 />
                 <Route path="/balance" element={<BalancePage />} />
+                <Route path="/reports" element={<ReportPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
