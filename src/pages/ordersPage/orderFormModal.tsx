@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Modal,
   Table,
@@ -20,18 +20,19 @@ import {
   IOrderDetails,
   IOrderUpdateRequest,
   ICreateOrderRequest,
+  IOrder,
 } from "../../api/ordersApi";
+import { useOrdersQuery } from "../../hooks/orders/useOrderQuery";
 
 const { Text } = Typography;
 
-// Константа для формата даты
 const DATE_FORMAT = "DD.MM.YYYY";
 
 interface IOrderFormModalProps {
   visible: boolean;
   onCancel: () => void;
   onSuccess: () => void;
-  order?: IOrderDetails; // Для режима редактирования
+  order?: IOrderDetails;
 }
 
 export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
@@ -42,18 +43,46 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [displayQuantities, setDisplayQuantities] = useState<
+    Record<string, string | number>
+  >({});
   const { data: productsData, isLoading: isProductsLoading } =
     useProductsQuery();
   const createMutation = useCreateOrderMutation();
   const updateMutation = useUpdateOrderMutation(order?.id || "");
-
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const isEditMode = !!order;
 
-  const disabledDate = (current: Dayjs) => {
-    const today = dayjs().startOf("day");
-    const minDate = today.add(3, "day");
-    const maxDate = today.add(6, "day");
-    return current && (current < minDate || current > maxDate);
+  const { data: allOrdersResponse } = useOrdersQuery({
+    limit: 10,
+    offset: 0,
+  });
+
+  const allOrders = allOrdersResponse?.data || [];
+
+  const handleKeyDown = (
+    recordId: string,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const productIds = productsData?.map((product) => product.id) || [];
+      const currentIndex = productIds.indexOf(recordId);
+
+      if (currentIndex < productIds.length - 1) {
+        const nextId = productIds[currentIndex + 1];
+        inputRefs.current[nextId]?.focus();
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const productIds = productsData?.map((product) => product.id) || [];
+      const currentIndex = productIds.indexOf(recordId);
+
+      if (currentIndex > 0) {
+        const prevId = productIds[currentIndex - 1];
+        inputRefs.current[prevId]?.focus();
+      }
+    }
   };
 
   const productColumns = [
@@ -68,17 +97,36 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
       key: "quantity",
       render: (_: any, record: any) => (
         <Input
+          ref={(el) => {
+            const nativeInput = el?.input;
+            if (nativeInput) {
+              inputRefs.current[record.id] = nativeInput;
+            } else {
+              inputRefs.current[record.id] = null;
+            }
+          }}
           type="number"
           min={0}
-          value={quantities[record.id] || 0}
+          value={displayQuantities[record.id]}
           onChange={(e) => {
-            const value = parseInt(e.target.value) || 0;
-            setQuantities((prev) => ({
-              ...prev,
-              [record.id]: value,
-            }));
+            const value = e.target.value;
+            setDisplayQuantities((prev) => ({ ...prev, [record.id]: value }));
+            const numericValue = value === "" ? 0 : parseInt(value) || 0;
+            setQuantities((prev) => ({ ...prev, [record.id]: numericValue }));
           }}
+          onKeyDown={(e) => handleKeyDown(record.id, e)}
           style={{ width: 100 }}
+          onFocus={(e) => {
+            e.target.select();
+            if (quantities[record.id] === 0) {
+              setDisplayQuantities((prev) => ({ ...prev, [record.id]: "" }));
+            }
+          }}
+          onBlur={() => {
+            if (displayQuantities[record.id] === "") {
+              setQuantities((prev) => ({ ...prev, [record.id]: 0 }));
+            }
+          }}
         />
       ),
     },
@@ -107,10 +155,10 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
             onSuccess();
             form.resetFields();
             setQuantities({});
+            setDisplayQuantities({});
           },
         });
       } else {
-        // Для создания заявки все еще нужна дата
         const values = await form.validateFields();
         const selectedDate = values.date;
 
@@ -124,6 +172,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
             onSuccess();
             form.resetFields();
             setQuantities({});
+            setDisplayQuantities({});
           },
         });
       }
@@ -135,31 +184,76 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
   useEffect(() => {
     if (visible) {
       if (isEditMode && order) {
-        // Для редактирования не устанавливаем дату в форму
         const initialQuantities: Record<string, number> = {};
+        const initialDisplayQuantities: Record<string, string | number> = {};
+
         order.products.forEach((product) => {
-          initialQuantities[product.id] = parseInt(product.qt) || 0;
+          const qt = parseInt(product.qt) || 0;
+          initialQuantities[product.id] = qt;
+          initialDisplayQuantities[product.id] = qt === 0 ? "" : qt;
         });
 
-        // Добавляем нули для остальных продуктов
         productsData?.forEach((product) => {
           if (initialQuantities[product.id] === undefined) {
             initialQuantities[product.id] = 0;
+            initialDisplayQuantities[product.id] = "";
           }
         });
 
         setQuantities(initialQuantities);
+        setDisplayQuantities(initialDisplayQuantities);
       } else if (productsData) {
-        // Режим создания - инициализируем нулями
         const initialQuantities: Record<string, number> = {};
+        const initialDisplayQuantities: Record<string, string | number> = {};
+
         productsData.forEach((product) => {
           initialQuantities[product.id] = 0;
+          initialDisplayQuantities[product.id] = "";
         });
+
         setQuantities(initialQuantities);
-        form.resetFields(); // Сбрасываем форму, включая дату
+        setDisplayQuantities(initialDisplayQuantities);
+        form.resetFields();
       }
     }
   }, [visible, productsData, order, isEditMode, form]);
+
+  const disabledDate = (current: Dayjs) => {
+    const today = dayjs().startOf("day");
+    const minDate = today.add(3, "day");
+    const maxDate = today.add(6, "day");
+
+    // Проверяем, что дата входит в допустимый диапазон
+    return current && (current < minDate || current > maxDate);
+  };
+
+  const isDateOccupied = (date: Dayjs) => {
+    return allOrders
+      .filter((order: IOrder) => !isEditMode || order.id !== order?.id)
+      .some((order: IOrder) => dayjs(order.delivery_date).isSame(date, "day"));
+  };
+
+  const dateRender = (current: Dayjs) => {
+    const isOutOfRange = disabledDate(current);
+    const isOccupied = isDateOccupied(current);
+
+    let style: React.CSSProperties = {};
+
+    if (isOutOfRange) {
+      style.color = "#ccc"; // Серый для дат вне диапазона
+      style.cursor = "not-allowed";
+    } else if (isOccupied) {
+      style.color = "#f7a8a8"; // Красный для занятых дат
+      style.cursor = "not-allowed";
+      style.fontWeight = "bold";
+    }
+
+    return (
+      <div className="ant-picker-cell-inner" style={style}>
+        {current.date()}
+      </div>
+    );
+  };
 
   return (
     <Modal
@@ -188,6 +282,7 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
               <DatePicker
                 style={{ width: "100%" }}
                 disabledDate={disabledDate}
+                dateRender={dateRender}
                 placeholder="Выберите дату"
                 format={DATE_FORMAT}
               />
@@ -195,8 +290,9 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
 
             <div style={{ marginBottom: 16 }}>
               <Text type="secondary">
-                Доступные даты: от {dayjs().add(3, "day").format(DATE_FORMAT)}{" "}
-                до {dayjs().add(6, "day").format(DATE_FORMAT)}
+                Доступные даты: от {dayjs().add(3, "day").format(DATE_FORMAT)}
+                до {dayjs().add(6, "day").format(DATE_FORMAT)} (кроме уже
+                занятых)
               </Text>
             </div>
           </>
