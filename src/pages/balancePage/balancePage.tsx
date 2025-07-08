@@ -128,9 +128,16 @@ export const BalancePage: React.FC = () => {
   const openEditModal = (productId: string) => {
     const items = groupedData[productId]?.items || [];
     const sold = groupedData[productId]?.initialSold || 0;
+
+    // Сортируем элементы по дате (от новых к старым)
+    const sortedItems = [...items].sort((a, b) => {
+      if (!a.date || !b.date) return 0;
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+
     setSelectedProductId(productId);
-    setOriginalItems(items.map((item) => ({ ...item })));
-    setEditableItems(items.map((item) => ({ ...item })));
+    setOriginalItems(sortedItems.map((item) => ({ ...item })));
+    setEditableItems(sortedItems.map((item) => ({ ...item })));
     setInitialSold(sold);
     setIsModalVisible(true);
   };
