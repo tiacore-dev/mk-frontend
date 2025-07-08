@@ -18,7 +18,7 @@ import dayjs, { type Dayjs } from "dayjs";
 import { PrinterOutlined } from "@ant-design/icons";
 import { PrintReport, printReportStyles } from "./printReport";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export interface IReportTableData {
   key: string;
@@ -30,7 +30,7 @@ export interface IReportTableData {
   sold: number;
   writtenOff: number;
   endBalance: number;
-  turnoverRate: number;
+  balanceRate: number;
 }
 
 export const ReportPage: React.FC = () => {
@@ -63,22 +63,22 @@ export const ReportPage: React.FC = () => {
   const tableData = useMemo(() => {
     if (!reportData || !productsData) return [];
 
-    return Object.entries(reportData)
-      .map(([productId, data]) => {
-        const turnoverRate =
-          data.startBalance > 0 ? (data.sold / data.startBalance) * 100 : 0;
+    return reportData
+      .map((data) => {
+        const balanceRate =
+          (data.startBalance + data.received) > 0 ? (data.endBalance / (data.startBalance + data.received)) * 100 : 0;
 
         return {
-          key: productId,
-          productId,
-          productName: productsMap[productId] || `Продукт ${productId}`,
+          key: data.productId,
+          productId: data.productId,
+          productName: productsMap[data.productId] || `Продукт ${data.productId}`,
           startBalance: data.startBalance,
           order: data.order,
           received: data.received,
           sold: data.sold,
           writtenOff: data.writtenOff,
           endBalance: data.endBalance,
-          turnoverRate: Math.round(turnoverRate * 100) / 100,
+          balanceRate: Math.round(balanceRate * 100) / 100,
         };
       })
       .sort((a, b) => a.productName.localeCompare(b.productName));
@@ -208,22 +208,22 @@ export const ReportPage: React.FC = () => {
       ),
     },
     {
-      title: "% оборачиваемости",
-      dataIndex: "turnoverRate",
-      key: "turnoverRate",
+      title: "% остатка",
+      dataIndex: "balanceRate",
+      key: "balanceRate",
       width: 120,
       align: "center",
       render: (value: number) => {
         let color = "#000";
         let backgroundColor = "#fff";
 
-        if (value <= 25) {
+        if (value <= 20) {
           color = "#52c41a";
           backgroundColor = "#f6ffed";
-        } else if (value <= 50) {
+        } else if (value <= 35) {
           color = "#faad14";
           backgroundColor = "#fffbe6";
-        } else if (value <= 75) {
+        } else if (value <= 50) {
           color = "#fa8c16";
           backgroundColor = "#fff7e6";
         } else {

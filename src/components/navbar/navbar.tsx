@@ -49,7 +49,7 @@ const menuItems: MenuProps["items"] = [
   {
     label: (
       <>
-        <BarChartOutlined /> Отчеты(в разработке)
+        <BarChartOutlined /> Отчеты
       </>
     ),
     key: "/reports",

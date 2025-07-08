@@ -67,12 +67,6 @@ export const PrintReport: React.FC<PrintReportProps> = ({
               <Typography.Text>{userData.address}</Typography.Text>
             </div>
           )}
-          {/* {userData?.fullName && (
-            <div>
-              <Typography.Text strong>Ответственный: </Typography.Text>
-              <Typography.Text>{userData.fullName}</Typography.Text>
-            </div>
-          )} */}
         </div>
       </div>
 
@@ -128,9 +122,9 @@ export const PrintReport: React.FC<PrintReportProps> = ({
             align: "center",
           },
           {
-            title: "% оборачиваемости",
-            dataIndex: "turnoverRate",
-            key: "turnoverRate",
+            title: "% остатка",
+            dataIndex: "balanceRate",
+            key: "balanceRate",
             align: "center",
             render: (value: number) => `${value}%`,
           },

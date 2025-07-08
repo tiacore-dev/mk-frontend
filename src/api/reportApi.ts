@@ -1,6 +1,7 @@
 import { axiosInstance } from "../axiosConfig";
 
 export interface IReportProductData {
+  productId: string; // id продукта
   startBalance: number; // остаток на начало дня шт
   order: number; // заказано шт
   received: number; // поступило шт
@@ -9,7 +10,7 @@ export interface IReportProductData {
   endBalance: number; // остаток на конец дня шт
 }
 
-export type IReportResponse = Record<string, IReportProductData>;
+export type IReportResponse = IReportProductData[];
 
 export const fetchReport = async (date: string): Promise<IReportResponse> => {
   const url = process.env.REACT_APP_API_URL;
