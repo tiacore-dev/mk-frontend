@@ -129,7 +129,7 @@ export const Navbar: React.FC = () => {
             overflow: "hidden", // Скрываем горизонтальный скролл
             whiteSpace: "nowrap", // Запрещаем перенос текста
           }}
-          overflowedIndicator={null} // Убираем кнопку с многоточием
+          // overflowedIndicator={null} // Убираем кнопку с многоточием
         />
       </div>
 
