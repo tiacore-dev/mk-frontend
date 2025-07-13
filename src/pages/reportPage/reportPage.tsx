@@ -86,7 +86,6 @@ export const ReportPage: React.FC = () => {
           writtenOffRate: Math.round(writtenOffRate * 100) / 100,
         };
       })
-      .sort((a, b) => a.productName.localeCompare(b.productName));
   }, [reportData, productsMap, productsData]);
 
   const columns: ColumnsType<IReportTableData> = [
