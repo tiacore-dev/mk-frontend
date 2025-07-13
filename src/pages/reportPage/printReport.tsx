@@ -9,13 +9,13 @@ interface PrintReportProps {
     fullName: string;
     address: string;
   };
-  date: string;
+  period: string;
 }
 
 export const PrintReport: React.FC<PrintReportProps> = ({
   data,
   userData,
-  date,
+  period,
 }) => {
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString();
@@ -58,8 +58,8 @@ export const PrintReport: React.FC<PrintReportProps> = ({
             </Typography.Text>
           </div>
           <div>
-            <Typography.Text strong>Отчет за: </Typography.Text>
-            <Typography.Text>{date}</Typography.Text>
+            <Typography.Text strong>Отчет за период: </Typography.Text>
+            <Typography.Text>{period}</Typography.Text>
           </div>
           {userData?.address && (
             <div>

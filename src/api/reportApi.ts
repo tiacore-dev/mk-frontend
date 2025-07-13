@@ -12,14 +12,14 @@ export interface IReportProductData {
 
 export type IReportResponse = IReportProductData[];
 
-export const fetchReport = async (date: string): Promise<IReportResponse> => {
+export const fetchReport = async (date_from: string, date_to: string): Promise<IReportResponse> => {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
 
   const response = await axiosInstance.get<IReportResponse>(
     `${url}report/get`,
     {
-      params: { date },
+      params: { date_from, date_to },
       headers: {
         token: token,
         "Content-Type": "application/json",

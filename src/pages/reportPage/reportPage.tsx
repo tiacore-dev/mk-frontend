@@ -31,10 +31,12 @@ export interface IReportTableData {
   writtenOff: number;
   endBalance: number;
   balanceRate: number;
+  writtenOffRate: number;
 }
 
 export const ReportPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
+  const [selectedDateFrom, setSelectedDateFrom] = useState<Dayjs>(dayjs());
+  const [selectedDateTo, setSelectedDateTo] = useState<Dayjs>(dayjs());
   const [isPrintModalVisible, setIsPrintModalVisible] = useState(false);
   const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
@@ -43,7 +45,7 @@ export const ReportPage: React.FC = () => {
     isLoading: isReportLoading,
     isError: isReportError,
     error: reportError,
-  } = useReportQuery(selectedDate.format("YYYY-MM-DD"));
+  } = useReportQuery(selectedDateFrom.format("YYYY-MM-DD"), selectedDateTo.format("YYYY-MM-DD"));
 
   const {
     data: productsData,
@@ -67,6 +69,8 @@ export const ReportPage: React.FC = () => {
       .map((data) => {
         const balanceRate =
           (data.startBalance + data.received) > 0 ? (data.endBalance / (data.startBalance + data.received)) * 100 : 0;
+        const writtenOffRate =
+          (data.startBalance + data.received) > 0 ? (data.writtenOff / (data.startBalance + data.received)) * 100 : 0;
 
         return {
           key: data.productId,
@@ -79,6 +83,7 @@ export const ReportPage: React.FC = () => {
           writtenOff: data.writtenOff,
           endBalance: data.endBalance,
           balanceRate: Math.round(balanceRate * 100) / 100,
+          writtenOffRate: Math.round(writtenOffRate * 100) / 100,
         };
       })
       .sort((a, b) => a.productName.localeCompare(b.productName));
@@ -246,6 +251,46 @@ export const ReportPage: React.FC = () => {
         );
       },
     },
+
+    {
+      title: "% списания",
+      dataIndex: "writtenOffRate",
+      key: "writtenOffRate",
+      width: 120,
+      align: "center",
+      render: (value: number) => {
+        let color = "#000";
+        let backgroundColor = "#fff";
+
+        if (value <= 2) {
+          color = "#52c41a";
+          backgroundColor = "#f6ffed";
+        } else if (value <= 4) {
+          color = "#faad14";
+          backgroundColor = "#fffbe6";
+        } else if (value <= 6) {
+          color = "#fa8c16";
+          backgroundColor = "#fff7e6";
+        } else {
+          color = "#f5222d";
+          backgroundColor = "#fff1f0";
+        }
+
+        return (
+          <div
+            style={{
+              color,
+              backgroundColor,
+              fontWeight: "500",
+              padding: "4px 8px",
+              borderRadius: "4px",
+            }}
+          >
+            {value}%
+          </div>
+        );
+      },
+    },
   ];
 
   const totals = useMemo(() => {
@@ -334,12 +379,19 @@ export const ReportPage: React.FC = () => {
         }}
       >
         <h2>
-          Отчет по движению товаров на {selectedDate.format("DD.MM.YYYY")}
+          Отчет по движению товаров за период с {selectedDateFrom.format("DD.MM.YYYY")} по {selectedDateTo.format("DD.MM.YYYY")}
         </h2>
         <Space>
           <DatePicker
-            value={selectedDate}
-            onChange={(date) => date && setSelectedDate(date)}
+            value={selectedDateFrom}
+            onChange={(date) => date && setSelectedDateFrom(date)}
+            format="DD.MM.YYYY"
+            placeholder="Выберите дату"
+            allowClear={false}
+          />
+           <DatePicker
+            value={selectedDateTo}
+            onChange={(date) => date && setSelectedDateTo(date)}
             format="DD.MM.YYYY"
             placeholder="Выберите дату"
             allowClear={false}
@@ -403,6 +455,9 @@ export const ReportPage: React.FC = () => {
                   <Table.Summary.Cell index={7} align="center">
                     <Text strong>-</Text>
                   </Table.Summary.Cell>
+                   <Table.Summary.Cell index={8} align="center">
+                    <Text strong> {(totals.startBalance + totals.received) > 0 ? Math.round((totals.writtenOff / (totals.startBalance + totals.received)) * 10000) / 100 : 0}%</Text>
+                  </Table.Summary.Cell>
                 </Table.Summary.Row>
               </Table.Summary>
             )
@@ -443,7 +498,7 @@ export const ReportPage: React.FC = () => {
         <PrintReport
           data={tableData}
           userData={userData}
-          date={selectedDate.format("DD.MM.YYYY")}
+          period={`${selectedDateFrom.format("DD.MM.YYYY")} - ${selectedDateTo.format("DD.MM.YYYY")}`}
         />
       </Modal>
     </div>

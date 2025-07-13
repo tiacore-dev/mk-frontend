@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Modal,
   Table,
@@ -52,12 +52,11 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
 
   const isEditMode = !!write_off;
 
-  const getAvailableQuantity = (productId: string) => {
-    const productBalance = balanceData?.find(
-      (item) => item.product === productId
-    );
-    return productBalance ? productBalance.qt : 0;
-  };
+  const getAvailableQuantity = useCallback((productId: string) => {
+    return balanceData?.reduce(
+      (acc, item) => item.product === productId ? acc + item.qt : acc, 0
+    ) ?? 0;
+  }, [balanceData]);
 
   const getAvailableDates = (productId: string): string[] => {
     return (
@@ -268,9 +267,9 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
     }
   }, [visible, productsData, write_off, isEditMode, form]);
 
-  const hasNegativeBalance = useMemo(() => {
-    return balanceData?.some((item) => item.qt < 0);
-  }, [balanceData]);
+  // const hasNegativeBalance = useMemo(() => {
+  //   return balanceData?.some((item) => item.qt < 0);
+  // }, [balanceData]);
 
   return (
     <Modal
@@ -294,7 +293,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
       width={1000}
       destroyOnClose
     >
-      {hasNegativeBalance && (
+      {/* {hasNegativeBalance && (
         <Alert
           message="Внимание"
           description="Создание списаний недоступно, так как есть нераспределенные реализации (отрицательные остатки)."
@@ -302,7 +301,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
           showIcon
           style={{ marginBottom: 16 }}
         />
-      )}
+      )} */}
 
       <Form form={form} layout="vertical">
         {!isEditMode ? (
