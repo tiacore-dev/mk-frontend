@@ -1,4 +1,7 @@
-import React, { useMemo, useState } from "react";
+"use client";
+
+import type React from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -8,11 +11,17 @@ import {
   Descriptions,
   Table,
   Typography,
+  Modal,
 } from "antd";
 import { useWriteOffDetailsQuery } from "../../hooks/writeOffs/useWriteOffsQuery";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import { WriteOffFormModal } from "./writeOffFormModal";
-import { EditOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  ArrowLeftOutlined,
+  PrinterOutlined,
+} from "@ant-design/icons";
+import { PrintWriteOff, printWriteOffStyles } from "./printWriteOff";
 
 const { Title, Text } = Typography;
 
@@ -20,6 +29,8 @@ export const WriteOffDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isPrintModalVisible, setIsPrintModalVisible] = useState(false);
+  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
   const {
     data: writeOff,
@@ -45,6 +56,54 @@ export const WriteOffDetailsPage: React.FC = () => {
 
   const handleBack = () => {
     navigate(-1);
+  };
+
+  const openPrintModal = () => {
+    setIsPrintModalVisible(true);
+  };
+
+  const handlePrint = () => {
+    const printContent = document.getElementById("print-content");
+    if (!printContent) return;
+
+    const styles = printWriteOffStyles;
+    const printWindow = document.createElement("iframe");
+
+    printWindow.style.position = "absolute";
+    printWindow.style.width = "0";
+    printWindow.style.height = "0";
+    printWindow.style.border = "none";
+    printWindow.style.left = "-9999px";
+
+    document.body.appendChild(printWindow);
+
+    const doc = printWindow.contentDocument;
+    if (doc) {
+      doc.open();
+      doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Печать списания</title>
+          <style>${styles}</style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+          <script>
+            setTimeout(function() {
+              window.print();
+              setTimeout(function() {
+                window.frameElement.parentNode.removeChild(window.frameElement);
+              }, 100);
+            }, 100);
+          </script>
+        </body>
+      </html>
+    `);
+      doc.close();
+    } else {
+      document.body.removeChild(printWindow);
+    }
   };
 
   const productColumns = [
@@ -99,23 +158,35 @@ export const WriteOffDetailsPage: React.FC = () => {
                 <div
                   style={{
                     display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <Button
+                      onClick={handleBack}
+                      style={{
+                        marginRight: 16,
+                        marginTop: 24,
+                        border: 0,
+                        fontSize: 18,
+                        boxShadow: "none",
+                      }}
+                      icon={<ArrowLeftOutlined />}
+                    ></Button>
+                    <Title level={4}>
+                      Детали списания от{" "}
+                      {new Date(writeOff.date).toLocaleDateString()}
+                    </Title>
+                  </div>
                   <Button
-                    onClick={handleBack}
-                    style={{
-                      marginRight: 16,
-                      marginTop: 24,
-                      border: 0,
-                      fontSize: 18,
-                      boxShadow: "none",
-                    }}
-                    icon={<ArrowLeftOutlined />}
-                  ></Button>
-                  <Title level={4}>
-                    Детали списания от{" "}
-                    {new Date(writeOff.date).toLocaleDateString()}
-                  </Title>
+                    type="primary"
+                    icon={<PrinterOutlined />}
+                    onClick={openPrintModal}
+                    style={{ marginTop: 24 }}
+                  >
+                    Печать
+                  </Button>
                 </div>
               }
             >
@@ -166,6 +237,33 @@ export const WriteOffDetailsPage: React.FC = () => {
               }}
               write_off={writeOff}
             />
+            <Modal
+              open={isPrintModalVisible}
+              onCancel={() => setIsPrintModalVisible(false)}
+              width={800}
+              footer={[
+                <Button
+                  key="cancel"
+                  onClick={() => setIsPrintModalVisible(false)}
+                >
+                  Отменить
+                </Button>,
+                <Button
+                  key="print"
+                  type="primary"
+                  icon={<PrinterOutlined />}
+                  onClick={handlePrint}
+                >
+                  Печать
+                </Button>,
+              ]}
+            >
+              <PrintWriteOff
+                data={writeOff}
+                productsMap={productsMap}
+                userData={userData}
+              />
+            </Modal>
           </>
         )}
       </Spin>
