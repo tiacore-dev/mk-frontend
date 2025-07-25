@@ -22,6 +22,7 @@ import {
   PrinterOutlined,
 } from "@ant-design/icons";
 import { PrintWriteOff, printWriteOffStyles } from "./printWriteOff";
+import "../../styles/pageStyles.css";
 
 const { Title, Text } = Typography;
 
@@ -149,95 +150,103 @@ export const WriteOffDetailsPage: React.FC = () => {
   const isLoading = isWriteOffLoading || isProductsLoading;
 
   return (
-    <div style={{ padding: "16px" }}>
+    <div className="page-container">
       <Spin spinning={isLoading}>
         {writeOff && (
           <>
-            <Card
-              title={
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
+            <div className="detail-card">
+              <div className="detail-card-header">
+                <Button
+                  color="primary"
+                  variant="link"
+                  onClick={handleBack}
+                  icon={<ArrowLeftOutlined />}
+                  size="large"
+                  className="detail-back-button"
+                  style={{ color: "#005696" }}
                 >
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <Button
-                      onClick={handleBack}
-                      style={{
-                        marginRight: 16,
-                        marginTop: 24,
-                        border: 0,
-                        fontSize: 18,
-                        boxShadow: "none",
-                      }}
-                      icon={<ArrowLeftOutlined />}
-                    ></Button>
-                    <Title level={4}>
-                      Детали списания от{" "}
-                      {new Date(writeOff.date).toLocaleDateString()}
-                    </Title>
-                  </div>
+                  <span style={{ color: "#000000a0" }}>Назад</span>
+                </Button>
+
+                <div className="detail-card-title">
+                  <Title level={4} style={{ margin: 0 }}>
+                    Детали списания от{" "}
+                    {new Date(writeOff.date).toLocaleDateString()}
+                  </Title>
+                </div>
+
+                <div className="detail-actions">
                   <Button
                     type="primary"
                     icon={<PrinterOutlined />}
                     onClick={openPrintModal}
-                    style={{ marginTop: 24 }}
                   >
                     Печать
                   </Button>
+                  <Button
+                    icon={<EditOutlined />}
+                    type="primary"
+                    onClick={() => setIsEditModalVisible(true)}
+                  >
+                    Редактировать
+                  </Button>
                 </div>
-              }
-            >
-              <Descriptions bordered column={1}>
-                <Descriptions.Item label="Дата списания">
-                  {new Date(writeOff.date).toLocaleDateString()}
-                </Descriptions.Item>
-                <Descriptions.Item label="Пользователь">
-                  {writeOff.user}
-                </Descriptions.Item>
-                <Descriptions.Item label="Описание">
-                  {writeOff.description || "-"}
-                </Descriptions.Item>
-              </Descriptions>
+              </div>
 
-              <Button
-                icon={<EditOutlined />}
-                type="primary"
-                onClick={() => setIsEditModalVisible(true)}
-                style={{ marginTop: 16 }}
-              >
-                Редактировать
-              </Button>
+              <div className="detail-content">
+                <Descriptions
+                  className="detail-descriptions"
+                  bordered
+                  column={1}
+                  style={{
+                    marginBottom: "0px",
+                  }}
+                >
+                  <Descriptions.Item label="Дата списания">
+                    {new Date(writeOff.date).toLocaleDateString()}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Пользователь">
+                    {writeOff.user}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Описание">
+                    {writeOff.description || "-"}
+                  </Descriptions.Item>
+                </Descriptions>
 
-              <Title
-                level={4}
-                style={{ marginTop: "24px", marginBottom: "16px" }}
-              >
-                Продукты:
-              </Title>
+                <Title
+                  level={4}
+                  style={{
+                    marginLeft: "8px",
+                    marginBottom: "16px",
+                    marginTop: "16px",
+                  }}
+                >
+                  Продукты
+                </Title>
 
-              <Table
-                columns={productColumns}
-                dataSource={writeOff.products}
-                rowKey="id"
-                pagination={false}
-                bordered
-                size="middle"
-              />
-            </Card>
+                <Table
+                  className="detail-table"
+                  columns={productColumns}
+                  dataSource={writeOff.products}
+                  rowKey="id"
+                  pagination={false}
+                  bordered
+                  size="middle"
+                />
+              </div>
+            </div>
 
             <WriteOffFormModal
               visible={isEditModalVisible}
               onCancel={() => setIsEditModalVisible(false)}
               onSuccess={() => {
                 setIsEditModalVisible(false);
-                // Можно добавить обновление данных после успешного редактирования
               }}
               write_off={writeOff}
             />
+
             <Modal
+              className="page-modal"
               open={isPrintModalVisible}
               onCancel={() => setIsPrintModalVisible(false)}
               width={800}

@@ -1,11 +1,13 @@
+"use client";
+
 // src/pages/BalancePage.tsx
-import React, { useState, useMemo } from "react";
+import type React from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   Alert,
   Button,
   Space,
-  Typography,
   Modal,
   InputNumber,
   Tooltip,
@@ -23,9 +25,10 @@ import {
   SaveOutlined,
 } from "@ant-design/icons";
 import { useChangeBalanceMutation } from "../../hooks/balance/useBalanseMutation";
-import { IBalanceItem } from "../../api/balanceApi";
+import type { IBalanceItem } from "../../api/balanceApi";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import { PrintInventory, printInventoryStyles } from "./printBalance";
+import "../../styles/pageStyles.css";
 
 interface TableDataItem {
   key: string;
@@ -325,23 +328,18 @@ export const BalancePage: React.FC = () => {
   const isSaveDisabled = initialSold > 0 && totalReduction !== initialSold;
 
   return (
-    <div style={{ padding: "24px" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
-        <h2>Остатки</h2>
-        <Button
-          type="primary"
-          icon={<PrinterOutlined />}
-          onClick={openPrintModal}
-        >
-          Печать
-        </Button>
+    <div className="page-container" id="no-click">
+      <div className="page-header">
+        <h2 className="page-title">Остатки</h2>
+        <div className="page-actions">
+          <Button
+            type="primary"
+            icon={<PrinterOutlined />}
+            onClick={openPrintModal}
+          >
+            Печать
+          </Button>
+        </div>
       </div>
 
       {isError && (
@@ -352,13 +350,16 @@ export const BalancePage: React.FC = () => {
           showIcon
         />
       )}
-      <Spin spinning={isLoading}>
-        <Table
-          dataSource={tableData}
-          columns={mainColumns}
-          pagination={false}
-        />
-      </Spin>
+      <div className="page-content">
+        <Spin spinning={isLoading}>
+          <Table
+            className="page-table"
+            dataSource={tableData}
+            columns={mainColumns}
+            pagination={false}
+          />
+        </Spin>
+      </div>
 
       <Modal
         title={
@@ -440,6 +441,7 @@ export const BalancePage: React.FC = () => {
       </Modal>
 
       <Modal
+        className="page-modal"
         // title="Печать инвентаризации"
         open={isPrintModalVisible}
         onCancel={() => setIsPrintModalVisible(false)}

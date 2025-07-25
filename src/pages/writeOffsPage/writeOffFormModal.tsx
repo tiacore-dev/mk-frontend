@@ -52,11 +52,17 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
 
   const isEditMode = !!write_off;
 
-  const getAvailableQuantity = useCallback((productId: string) => {
-    return balanceData?.reduce(
-      (acc, item) => item.product === productId ? acc + item.qt : acc, 0
-    ) ?? 0;
-  }, [balanceData]);
+  const getAvailableQuantity = useCallback(
+    (productId: string) => {
+      return (
+        balanceData?.reduce(
+          (acc, item) => (item.product === productId ? acc + item.qt : acc),
+          0
+        ) ?? 0
+      );
+    },
+    [balanceData]
+  );
 
   const getAvailableDates = (productId: string): string[] => {
     return (

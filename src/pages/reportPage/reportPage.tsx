@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import type React from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   DatePicker,
@@ -9,7 +10,6 @@ import {
   Typography,
   Button,
   Modal,
-  Space,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useReportQuery } from "../../hooks/reports/useReportQuery";
@@ -17,6 +17,7 @@ import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import dayjs, { type Dayjs } from "dayjs";
 import { PrinterOutlined } from "@ant-design/icons";
 import { PrintReport, printReportStyles } from "./printReport";
+import "../../styles/pageStyles.css";
 
 const { Text } = Typography;
 
@@ -45,7 +46,10 @@ export const ReportPage: React.FC = () => {
     isLoading: isReportLoading,
     isError: isReportError,
     error: reportError,
-  } = useReportQuery(selectedDateFrom.format("YYYY-MM-DD"), selectedDateTo.format("YYYY-MM-DD"));
+  } = useReportQuery(
+    selectedDateFrom.format("YYYY-MM-DD"),
+    selectedDateTo.format("YYYY-MM-DD")
+  );
 
   const {
     data: productsData,
@@ -65,27 +69,30 @@ export const ReportPage: React.FC = () => {
   const tableData = useMemo(() => {
     if (!reportData || !productsData) return [];
 
-    return reportData
-      .map((data) => {
-        const balanceRate =
-          (data.startBalance + data.received) > 0 ? (data.endBalance / (data.startBalance + data.received)) * 100 : 0;
-        const writtenOffRate =
-          (data.startBalance + data.received) > 0 ? (data.writtenOff / (data.startBalance + data.received)) * 100 : 0;
+    return reportData.map((data) => {
+      const balanceRate =
+        data.startBalance + data.received > 0
+          ? (data.endBalance / (data.startBalance + data.received)) * 100
+          : 0;
+      const writtenOffRate =
+        data.startBalance + data.received > 0
+          ? (data.writtenOff / (data.startBalance + data.received)) * 100
+          : 0;
 
-        return {
-          key: data.productId,
-          productId: data.productId,
-          productName: productsMap[data.productId] || `Продукт ${data.productId}`,
-          startBalance: data.startBalance,
-          order: data.order,
-          received: data.received,
-          sold: data.sold,
-          writtenOff: data.writtenOff,
-          endBalance: data.endBalance,
-          balanceRate: Math.round(balanceRate * 100) / 100,
-          writtenOffRate: Math.round(writtenOffRate * 100) / 100,
-        };
-      })
+      return {
+        key: data.productId,
+        productId: data.productId,
+        productName: productsMap[data.productId] || `Продукт ${data.productId}`,
+        startBalance: data.startBalance,
+        order: data.order,
+        received: data.received,
+        sold: data.sold,
+        writtenOff: data.writtenOff,
+        endBalance: data.endBalance,
+        balanceRate: Math.round(balanceRate * 100) / 100,
+        writtenOffRate: Math.round(writtenOffRate * 100) / 100,
+      };
+    });
   }, [reportData, productsMap, productsData]);
 
   const columns: ColumnsType<IReportTableData> = [
@@ -368,19 +375,14 @@ export const ReportPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "24px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 16,
-        }}
-      >
-        <h2>
-          Отчет по движению товаров за период с {selectedDateFrom.format("DD.MM.YYYY")} по {selectedDateTo.format("DD.MM.YYYY")}
+    <div className="page-container" id="no-click">
+      <div className="page-header">
+        <h2 className="page-title">
+          Отчет по движению товаров за период с{" "}
+          {selectedDateFrom.format("DD.MM.YYYY")} по{" "}
+          {selectedDateTo.format("DD.MM.YYYY")}
         </h2>
-        <Space>
+        <div className="page-actions">
           <DatePicker
             value={selectedDateFrom}
             onChange={(date) => date && setSelectedDateFrom(date)}
@@ -388,7 +390,7 @@ export const ReportPage: React.FC = () => {
             placeholder="Выберите дату"
             allowClear={false}
           />
-           <DatePicker
+          <DatePicker
             value={selectedDateTo}
             onChange={(date) => date && setSelectedDateTo(date)}
             format="DD.MM.YYYY"
@@ -403,7 +405,7 @@ export const ReportPage: React.FC = () => {
           >
             Печать
           </Button>
-        </Space>
+        </div>
       </div>
 
       {isError && (
@@ -418,51 +420,64 @@ export const ReportPage: React.FC = () => {
         />
       )}
 
-      <Spin spinning={isLoading}>
-        <Table
-          columns={columns}
-          dataSource={tableData}
-          pagination={false}
-          scroll={{ x: 1000 }}
-          bordered
-          size="small"
-          summary={() =>
-            totals && (
-              <Table.Summary fixed>
-                <Table.Summary.Row style={{ backgroundColor: "#fafafa" }}>
-                  <Table.Summary.Cell index={0}>
-                    <Text strong>ИТОГО:</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={1} align="center">
-                    <Text strong>{totals.startBalance}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={2} align="center">
-                    <Text strong>{totals.order}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={3} align="center">
-                    <Text strong>{totals.received}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={4} align="center">
-                    <Text strong>{totals.sold}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={5} align="center">
-                    <Text strong>{totals.writtenOff}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={6} align="center">
-                    <Text strong>{totals.endBalance}</Text>
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={7} align="center">
-                    <Text strong>-</Text>
-                  </Table.Summary.Cell>
-                   <Table.Summary.Cell index={8} align="center">
-                    <Text strong> {(totals.startBalance + totals.received) > 0 ? Math.round((totals.writtenOff / (totals.startBalance + totals.received)) * 10000) / 100 : 0}%</Text>
-                  </Table.Summary.Cell>
-                </Table.Summary.Row>
-              </Table.Summary>
-            )
-          }
-        />
-      </Spin>
+      <div className="page-content">
+        <Spin spinning={isLoading}>
+          <Table
+            className="page-table"
+            columns={columns}
+            dataSource={tableData}
+            pagination={false}
+            scroll={{ x: 1000 }}
+            bordered
+            size="small"
+            summary={() =>
+              totals && (
+                <Table.Summary fixed>
+                  <Table.Summary.Row style={{ backgroundColor: "#fafafa" }}>
+                    <Table.Summary.Cell index={0}>
+                      <Text strong>ИТОГО:</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={1} align="center">
+                      <Text strong>{totals.startBalance}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={2} align="center">
+                      <Text strong>{totals.order}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={3} align="center">
+                      <Text strong>{totals.received}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={4} align="center">
+                      <Text strong>{totals.sold}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={5} align="center">
+                      <Text strong>{totals.writtenOff}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={6} align="center">
+                      <Text strong>{totals.endBalance}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={7} align="center">
+                      <Text strong>-</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={8} align="center">
+                      <Text strong>
+                        {" "}
+                        {totals.startBalance + totals.received > 0
+                          ? Math.round(
+                              (totals.writtenOff /
+                                (totals.startBalance + totals.received)) *
+                                10000
+                            ) / 100
+                          : 0}
+                        %
+                      </Text>
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                </Table.Summary>
+              )
+            }
+          />
+        </Spin>
+      </div>
 
       {tableData.length === 0 && !isLoading && !isError && (
         <div
@@ -493,11 +508,14 @@ export const ReportPage: React.FC = () => {
             Печать
           </Button>,
         ]}
+        className="page-modal"
       >
         <PrintReport
           data={tableData}
           userData={userData}
-          period={`${selectedDateFrom.format("DD.MM.YYYY")} - ${selectedDateTo.format("DD.MM.YYYY")}`}
+          period={`${selectedDateFrom.format(
+            "DD.MM.YYYY"
+          )} - ${selectedDateTo.format("DD.MM.YYYY")}`}
         />
       </Modal>
     </div>

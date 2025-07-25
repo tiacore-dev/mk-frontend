@@ -1,0 +1,274 @@
+/* Общие стили для всех страниц */
+.page-container {
+  padding: 24px;
+  background-color: #ffffff;
+  min-height: calc(100vh - 64px);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0;
+}
+
+.page-title {
+  margin: 0 !important;
+  color: #262626;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.page-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.page-content {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.page-table {
+  margin: 0;
+}
+
+.page-table .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  border: 1px solid #f0f0f0;
+  font-weight: 600;
+  color: #262626;
+  padding: 24px;
+}
+
+.page-table .ant-table-tbody > tr > td {
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.page-table .ant-table-tbody > tr:hover > td {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+/* Стили для карточек деталей */
+.detail-card {
+  margin: 0;
+  border-radius: 8px;
+  padding: 0;
+}
+
+.detail-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  /* margin-bottom: 24px; */
+}
+
+.detail-card-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  margin: 0 auto;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.detail-card-title .ant-typography {
+  display: inline-block;
+  pointer-events: auto;
+}
+
+.detail-back-button {
+  position: relative;
+  z-index: 2;
+  margin-right: 16px;
+  margin-bottom: 0px;
+  font-weight: 500;
+  font-size: 17px;
+  height: 36px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.detail-actions {
+  position: relative;
+  z-index: 2;
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.detail-content {
+  padding: 24px 12px;
+}
+
+.detail-descriptions {
+  margin-bottom: 24px;
+}
+
+.detail-descriptions .ant-descriptions-item-label {
+  font-weight: 600;
+  width: 200px;
+}
+
+.detail-section-title {
+  margin: 32px 0 16px 0 !important;
+  color: #262626;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.detail-table {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Стили для модальных окон */
+.page-modal .ant-modal-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 20px 24px;
+}
+
+.page-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.page-modal .ant-modal-footer {
+  border-top: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+/* Стили для форм */
+.page-form .ant-form-item {
+  margin-bottom: 20px;
+}
+
+.page-form .ant-form-item-label > label {
+  font-weight: 600;
+  color: #262626;
+}
+
+.page-form .ant-input,
+.page-form .ant-select-selector,
+.page-form .ant-picker {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.2s;
+}
+
+.page-form .ant-input:focus,
+.page-form .ant-select-focused .ant-select-selector,
+.page-form .ant-picker-focused {
+  border-color: #005696;
+  box-shadow: 0 0 0 2px rgba(0, 86, 150, 0.1);
+}
+
+/* Стили для тегов статусов */
+.status-tag {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: none;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .page-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .detail-card-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .detail-card-title {
+    position: static;
+    order: 2;
+    width: 100%;
+    text-align: center;
+    margin-top: 16px;
+    pointer-events: auto;
+  }
+
+  .detail-back-button {
+    align-self: flex-start;
+    order: 1;
+  }
+
+  .detail-actions {
+    order: 3;
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 16px;
+    margin-left: 0;
+  }
+}
+
+/* Анимации */
+.page-content,
+.detail-card {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Спиннер */
+.page-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Стили для уменьшения высоты строк в Descriptions */
+.ant-descriptions-row > th,
+.ant-descriptions-row > td {
+  padding: 8px 16px !important;
+}
+
+.ant-descriptions-item-label {
+  padding: 8px 16px !important;
+  background-color: #fafafa !important;
+}
+
+.ant-descriptions-item-content {
+  padding: 8px 16px !important;
+}
+
+/* Для BalancePage */
+#no-click .page-table .ant-table-tbody > tr:hover > td {
+  cursor: default;
+  background-color: inherit !important;
+}

@@ -1,9 +1,12 @@
+"use client";
+
 import React from "react";
 import { Table, Spin, Alert, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 import { useMovementsQuery } from "../../hooks/movements/useMovementsQuery";
-import { IMovement } from "../../api/movomentsApi";
+import type { IMovement } from "../../api/movomentsApi";
+import "../../styles/pageStyles.css";
 
 const STATUS_COLORS = {
   Новое: "green",
@@ -47,11 +50,11 @@ export const MovementsPage: React.FC = () => {
       key: "status",
       render: (status: string) => (
         <Tag
+          className="status-tag"
           color={
             STATUS_COLORS[status as keyof typeof STATUS_COLORS] ||
             STATUS_COLORS.default
           }
-          style={{ fontSize: 14 }}
         >
           {status}
         </Tag>
@@ -67,37 +70,10 @@ export const MovementsPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "24px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h2>Список перемещений</h2>
+    <div className="page-container">
+      <div className="page-header">
+        <h2 className="page-title">Список перемещений</h2>
       </div>
-
-      <Spin spinning={isLoading}>
-        <Table
-          columns={columns}
-          dataSource={data?.data}
-          rowKey="id"
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: data?.total || 0,
-            showSizeChanger: true,
-            pageSizeOptions: ["10", "20", "50"],
-          }}
-          onChange={handleTableChange}
-          onRow={(record) => {
-            return {
-              onClick: () => navigate(`/movements/${record.id}`),
-            };
-          }}
-        />
-      </Spin>
 
       {isError && (
         <Alert
@@ -107,8 +83,33 @@ export const MovementsPage: React.FC = () => {
           }
           type="error"
           showIcon
+          style={{ marginBottom: 24 }}
         />
       )}
+
+      <div className="page-content">
+        <Spin spinning={isLoading}>
+          <Table
+            className="page-table"
+            columns={columns}
+            dataSource={data?.data}
+            rowKey="id"
+            pagination={{
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              total: data?.total || 0,
+              showSizeChanger: true,
+              pageSizeOptions: ["10", "20", "50"],
+            }}
+            onChange={handleTableChange}
+            onRow={(record) => {
+              return {
+                onClick: () => navigate(`/movements/${record.id}`),
+              };
+            }}
+          />
+        </Spin>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,7 @@
-import React, { useMemo, useState } from "react";
+"use client";
+
+import type React from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -14,6 +17,7 @@ import { useOrderDetailsQuery } from "../../hooks/orders/useOrderQuery";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import { OrderFormModal } from "./orderFormModal";
 import { EditOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import "../../styles/pageStyles.css";
 
 const { Title, Text } = Typography;
 
@@ -86,94 +90,104 @@ export const OrderDetailsPage: React.FC = () => {
   const canEdit = order?.status === "Новая";
 
   return (
-    <div style={{ padding: "16px" }}>
+    <div className="page-container">
       <Spin spinning={isLoading}>
         {order && (
           <>
-            <Card
-              title={
-                <div
-                  style={{
-                    display: "flex",
-                  }}
+            <div className="detail-card">
+              <div className="detail-card-header">
+                <Button
+                  color="primary"
+                  variant="link"
+                  onClick={handleBack}
+                  icon={<ArrowLeftOutlined />}
+                  size="large"
+                  className="detail-back-button"
+                  style={{ color: "#005696" }}
                 >
-                  <Button
-                    onClick={handleBack}
-                    style={{
-                      marginRight: 16,
-                      marginTop: 24,
-                      border: 0,
-                      fontSize: 18,
-                      boxShadow: "none",
-                    }}
-                    icon={<ArrowLeftOutlined />}
-                  ></Button>
-                  <Title level={4}>
+                  <span style={{ color: "#000000a0" }}>Назад</span>
+                </Button>
+
+                <div className="detail-card-title">
+                  <Title level={4} style={{ margin: 0 }}>
                     Детали заявки от {new Date(order.date).toLocaleDateString()}
                   </Title>
                 </div>
-              }
-            >
-              <Descriptions bordered column={1}>
-                <Descriptions.Item label="Производство">
-                  <Text strong>{order.production}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Дата заявки">
-                  {new Date(order.date).toLocaleDateString()}
-                </Descriptions.Item>
-                <Descriptions.Item label="Пользователь">
-                  {order.user}
-                </Descriptions.Item>
-                <Descriptions.Item label="Статус">
-                  {order.status === "Новая" ? (
-                    <Tag color="green" style={{ fontSize: 14 }}>
-                      {order.status}
-                    </Tag>
-                  ) : order.status === "Перемещение" ? (
-                    <Tag color="cyan" style={{ fontSize: 14 }}>
-                      {order.status}
-                    </Tag>
-                  ) : order.status === "Принята" ? (
-                    <Tag color="geekblue" style={{ fontSize: 14 }}>
-                      {order.status}
-                    </Tag>
-                  ) : (
-                    <Tag color="blue" style={{ fontSize: 14 }}>
-                      {order.status}
-                    </Tag>
+
+                <div className="detail-actions">
+                  {canEdit && (
+                    <Button
+                      icon={<EditOutlined />}
+                      type="primary"
+                      onClick={() => setIsEditModalVisible(true)}
+                    >
+                      Редактировать
+                    </Button>
                   )}
-                </Descriptions.Item>
-                <Descriptions.Item label="Дата перемещения">
-                  {new Date(order.delivery_date).toLocaleDateString()}
-                </Descriptions.Item>
-              </Descriptions>
+                </div>
+              </div>
 
-              {canEdit && (
-                <Button
-                  icon={<EditOutlined />}
-                  type="primary"
-                  onClick={() => setIsEditModalVisible(true)}
-                  style={{ marginTop: 16 }}
+              <div className="detail-content">
+                <Descriptions
+                  className="detail-descriptions"
+                  bordered
+                  column={1}
+                  style={{
+                    marginBottom: "0px",
+                  }}
                 >
-                  Редактировать
-                </Button>
-              )}
-              <Title
-                level={4}
-                style={{ marginTop: "24px", marginBottom: "16px" }}
-              >
-                Продукты:
-              </Title>
+                  <Descriptions.Item label="Производство">
+                    <Text strong>{order.production}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Дата заявки">
+                    {new Date(order.date).toLocaleDateString()}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Пользователь">
+                    {order.user}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Статус">
+                    <Tag
+                      className="status-tag"
+                      color={
+                        order.status === "Новая"
+                          ? "green"
+                          : order.status === "Перемещение"
+                          ? "cyan"
+                          : order.status === "Принята"
+                          ? "geekblue"
+                          : "blue"
+                      }
+                    >
+                      {order.status}
+                    </Tag>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Дата перемещения">
+                    {new Date(order.delivery_date).toLocaleDateString()}
+                  </Descriptions.Item>
+                </Descriptions>
 
-              <Table
-                columns={productColumns}
-                dataSource={order.products}
-                rowKey="id"
-                pagination={false}
-                bordered
-                size="middle"
-              />
-            </Card>
+                <Title
+                  level={4}
+                  style={{
+                    marginLeft: "8px",
+                    marginBottom: "16px",
+                    marginTop: "16px",
+                  }}
+                >
+                  Продукты
+                </Title>
+
+                <Table
+                  className="detail-table"
+                  columns={productColumns}
+                  dataSource={order.products}
+                  rowKey="id"
+                  pagination={false}
+                  bordered
+                  size="middle"
+                />
+              </div>
+            </div>
 
             <OrderFormModal
               visible={isEditModalVisible}

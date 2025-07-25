@@ -1,4 +1,7 @@
-import React, { useMemo, useState } from "react";
+"use client";
+
+import type React from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -21,6 +24,7 @@ import {
   ArrowLeftOutlined,
   ExportOutlined,
 } from "@ant-design/icons";
+import "../../styles/pageStyles.css";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -60,7 +64,6 @@ export const MovementDetailsPage: React.FC = () => {
     navigate(-1);
   };
 
-  // Обработчик принятия без комментария
   const handleAccept = async () => {
     if (!id) return;
 
@@ -70,7 +73,6 @@ export const MovementDetailsPage: React.FC = () => {
     } catch (error) {}
   };
 
-  // Обработчик принятия с комментарием
   const handleAcceptWithComment = async () => {
     if (!id) return;
 
@@ -120,128 +122,136 @@ export const MovementDetailsPage: React.FC = () => {
   const canConfirm = movement?.status === "В работе";
 
   return (
-    <div style={{ padding: "16px" }}>
+    <div className="page-container">
       <Spin spinning={isLoading}>
         {movement && (
           <>
-            <Card
-              title={
-                <div
-                  style={{
-                    display: "flex",
-                  }}
+            <div className="detail-card">
+              <div className="detail-card-header">
+                <Button
+                  color="primary"
+                  variant="link"
+                  onClick={handleBack}
+                  icon={<ArrowLeftOutlined />}
+                  size="large"
+                  className="detail-back-button"
+                  style={{ color: "#005696" }}
                 >
-                  <Button
-                    onClick={handleBack}
-                    style={{
-                      marginRight: 16,
-                      marginTop: 24,
-                      border: 0,
-                      fontSize: 18,
-                      boxShadow: "none",
-                    }}
-                    icon={<ArrowLeftOutlined />}
-                  ></Button>
-                  <Title level={4}>
+                  <span style={{ color: "#000000a0" }}>Назад</span>
+                </Button>
+
+                <div className="detail-card-title">
+                  <Title level={4} style={{ margin: 0 }}>
                     Детали перемещения от{" "}
                     {new Date(movement.date).toLocaleDateString()}
                   </Title>
                 </div>
-              }
-            >
-              <Descriptions bordered column={1}>
-                <Descriptions.Item label="Производитель">
-                  <Text strong>{movement.sender}</Text>
-                </Descriptions.Item>
-                <Descriptions.Item label="Статус">
-                  {movement.status === "Новое" ? (
-                    <Tag color="green" style={{ fontSize: 14 }}>
-                      {movement.status}
-                    </Tag>
-                  ) : movement.status === "В работе" ? (
-                    <Tag color="cyan" style={{ fontSize: 14 }}>
-                      {movement.status}
-                    </Tag>
-                  ) : movement.status === "Завершено" ? (
-                    <Tag color="geekblue" style={{ fontSize: 14 }}>
-                      {movement.status}
-                    </Tag>
-                  ) : (
-                    <Tag color="blue" style={{ fontSize: 14 }}>
-                      {movement.status}
-                    </Tag>
+
+                <div className="detail-actions">
+                  {canConfirm && (
+                    <>
+                      <Button
+                        icon={<CheckOutlined />}
+                        type="primary"
+                        onClick={handleAccept}
+                        loading={acceptMovementMutation.isPending}
+                      >
+                        Принять
+                      </Button>
+                      <Button
+                        icon={<EditOutlined />}
+                        onClick={() => setIsCommentModalVisible(true)}
+                        loading={acceptMovementMutation.isPending}
+                      >
+                        Принять с корректировкой
+                      </Button>
+                    </>
                   )}
-                </Descriptions.Item>
-                <Descriptions.Item label="Пользователь">
-                  {movement.user}
-                </Descriptions.Item>
-                <Descriptions.Item
-                  label={
-                    <span>
-                      Заявка
-                      <ExportOutlined
-                        style={{
-                          marginLeft: 8,
-                          color: "#0880ef",
-                          cursor: "pointer",
-                          fontSize: 16,
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/orders/${movement.order}`);
-                        }}
-                      />
-                    </span>
-                  }
+                </div>
+              </div>
+
+              <div className="detail-content">
+                <Descriptions
+                  className="detail-descriptions"
+                  bordered
+                  column={1}
+                  style={{
+                    marginBottom: "0px",
+                  }}
                 >
-                  {""}
-                </Descriptions.Item>
-              </Descriptions>
-
-              {canConfirm && (
-                <>
-                  <Button
-                    icon={<CheckOutlined />}
-                    type="primary"
-                    onClick={handleAccept}
-                    style={{ marginTop: 16 }}
-                    loading={acceptMovementMutation.isPending}
+                  <Descriptions.Item label="Производитель">
+                    <Text strong>{movement.sender}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Статус">
+                    <Tag
+                      className="status-tag"
+                      color={
+                        movement.status === "Новое"
+                          ? "green"
+                          : movement.status === "В работе"
+                          ? "cyan"
+                          : movement.status === "Завершено"
+                          ? "geekblue"
+                          : "blue"
+                      }
+                    >
+                      {movement.status}
+                    </Tag>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Пользователь">
+                    {movement.user}
+                  </Descriptions.Item>
+                  <Descriptions.Item
+                    label={
+                      <span>
+                        Заявка
+                        <ExportOutlined
+                          style={{
+                            marginLeft: 8,
+                            color: "#0880ef",
+                            cursor: "pointer",
+                            fontSize: 16,
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/orders/${movement.order}`);
+                          }}
+                        />
+                      </span>
+                    }
                   >
-                    Принять
-                  </Button>
-                  <Button
-                    icon={<EditOutlined />}
-                    onClick={() => setIsCommentModalVisible(true)}
-                    style={{ marginLeft: 8 }}
-                    loading={acceptMovementMutation.isPending}
-                  >
-                    Принять с корректировкой
-                  </Button>
-                </>
-              )}
+                    {""}
+                  </Descriptions.Item>
+                </Descriptions>
 
-              <Title
-                level={4}
-                style={{ marginTop: "16px", marginBottom: "16px" }}
-              >
-                Продукты:
-              </Title>
+                <Title
+                  level={4}
+                  style={{
+                    marginLeft: "8px",
+                    marginBottom: "16px",
+                    marginTop: "16px",
+                  }}
+                >
+                  Продукты
+                </Title>
 
-              <Table
-                columns={productColumns}
-                dataSource={movement.products}
-                rowKey="id"
-                pagination={false}
-                bordered
-                size="middle"
-              />
-            </Card>
+                <Table
+                  className="detail-table"
+                  columns={productColumns}
+                  dataSource={movement.products}
+                  rowKey="id"
+                  pagination={false}
+                  bordered
+                  size="middle"
+                />
+              </div>
+            </div>
           </>
         )}
       </Spin>
 
-      {/* Модальное окно для комментария */}
       <Modal
+        className="page-modal"
         title="Введите комментарий"
         open={isCommentModalVisible}
         onOk={handleAcceptWithComment}

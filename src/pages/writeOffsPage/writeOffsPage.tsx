@@ -1,12 +1,15 @@
+"use client";
+
 import React, { useState } from "react";
-import { Table, Spin, Alert, Button, Tag } from "antd";
+import { Table, Spin, Alert, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useWriteOffsQuery } from "../../hooks/writeOffs/useWriteOffsQuery";
-import { IWriteOff } from "../../api/writeOffsApi";
+import type { IWriteOff } from "../../api/writeOffsApi";
 import { useNavigate } from "react-router-dom";
 // import { OrderFormModal } from "./orderFormModal";
 import { PlusOutlined } from "@ant-design/icons";
 import { WriteOffFormModal } from "./writeOffFormModal";
+import "../../styles/pageStyles.css";
 
 export const WriteOffsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -48,49 +51,20 @@ export const WriteOffsPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "24px" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <h2>Список списаний</h2>
-        <Button
-          icon={<PlusOutlined />}
-          type="primary"
-          onClick={() => setIsModalVisible(true)}
-          style={{ marginLeft: 24, marginTop: 4 }}
-        >
-          Добавить списание
-        </Button>
+    <div className="page-container">
+      <div className="page-header">
+        <h2 className="page-title">Список списаний</h2>
+        <div className="page-actions">
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => setIsModalVisible(true)}
+          >
+            Добавить списание
+          </Button>
+        </div>
       </div>
 
-      <Spin spinning={isLoading}>
-        <Table
-          columns={columns}
-          dataSource={data?.data}
-          rowKey="id"
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: data?.total || 0,
-            showSizeChanger: true,
-            pageSizeOptions: ["10", "20", "50"],
-          }}
-          onChange={handleTableChange}
-          onRow={(record) => {
-            return {
-              onClick: () => navigate(`/write_offs/${record.id}`),
-            };
-          }}
-        />
-      </Spin>
-      <WriteOffFormModal
-        visible={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        onSuccess={() => setIsModalVisible(false)}
-      />
       {isError && (
         <Alert
           message="Ошибка"
@@ -99,8 +73,39 @@ export const WriteOffsPage: React.FC = () => {
           }
           type="error"
           showIcon
+          style={{ marginBottom: 24 }}
         />
       )}
+
+      <div className="page-content">
+        <Spin spinning={isLoading}>
+          <Table
+            className="page-table"
+            columns={columns}
+            dataSource={data?.data}
+            rowKey="id"
+            pagination={{
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              total: data?.total || 0,
+              showSizeChanger: true,
+              pageSizeOptions: ["10", "20", "50"],
+            }}
+            onChange={handleTableChange}
+            onRow={(record) => {
+              return {
+                onClick: () => navigate(`/write_offs/${record.id}`),
+              };
+            }}
+          />
+        </Spin>
+      </div>
+
+      <WriteOffFormModal
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        onSuccess={() => setIsModalVisible(false)}
+      />
     </div>
   );
 };
