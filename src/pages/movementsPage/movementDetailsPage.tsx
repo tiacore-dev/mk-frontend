@@ -203,12 +203,23 @@ export const MovementDetailsPage: React.FC = () => {
                   </Descriptions.Item>
                   <Descriptions.Item
                     label={
-                      <span>
+                      <span
+                        style={{
+                          // marginLeft: 8,
+                          color: "#016fc4ff",
+                          cursor: "pointer",
+                          fontSize: 16,
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/orders/${movement.order}`);
+                        }}
+                      >
                         Заявка
                         <ExportOutlined
                           style={{
                             marginLeft: 8,
-                            color: "#0880ef",
+                            color: "#016fc4ff",
                             cursor: "pointer",
                             fontSize: 16,
                           }}
@@ -242,7 +253,6 @@ export const MovementDetailsPage: React.FC = () => {
                   rowKey="id"
                   pagination={false}
                   bordered
-                  size="middle"
                 />
               </div>
             </div>

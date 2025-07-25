@@ -231,7 +231,6 @@ export const WriteOffDetailsPage: React.FC = () => {
                   rowKey="id"
                   pagination={false}
                   bordered
-                  size="middle"
                 />
               </div>
             </div>

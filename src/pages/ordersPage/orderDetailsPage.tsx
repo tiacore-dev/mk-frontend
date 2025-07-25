@@ -184,7 +184,6 @@ export const OrderDetailsPage: React.FC = () => {
                   rowKey="id"
                   pagination={false}
                   bordered
-                  size="middle"
                 />
               </div>
             </div>
