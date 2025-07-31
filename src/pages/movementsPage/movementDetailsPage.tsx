@@ -212,7 +212,7 @@ export const MovementDetailsPage: React.FC = () => {
                     {movement.user}
                   </Descriptions.Item>
 
-                  {!movement.recipient && (
+                  {movement.order != "00000000-0000-0000-0000-000000000000" && (
                     <Descriptions.Item
                       label={
                         <span
