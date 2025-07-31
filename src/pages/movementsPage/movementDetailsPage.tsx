@@ -4,7 +4,6 @@ import type React from "react";
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Card,
   Spin,
   Alert,
   Button,
@@ -119,7 +118,15 @@ export const MovementDetailsPage: React.FC = () => {
   }
 
   const isLoading = isMovementLoading || isProductsLoading;
-  const canConfirm = movement?.status === "В работе";
+
+  // Получаем данные текущего пользователя
+  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+  const currentUserId = userData.address;
+
+  // Проверяем, может ли текущий пользователь принять перемещение
+  // Принимать может только получатель и только если статус "В работе"
+  const canConfirm =
+    movement?.status === "В работе" && movement?.recipient === currentUserId;
 
   return (
     <div className="page-container">
@@ -179,8 +186,11 @@ export const MovementDetailsPage: React.FC = () => {
                     marginBottom: "0px",
                   }}
                 >
-                  <Descriptions.Item label="Производитель">
+                  <Descriptions.Item label="Отправитель">
                     <Text strong>{movement.sender}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Получатель">
+                    <Text strong>{movement.recipient || "-"}</Text>
                   </Descriptions.Item>
                   <Descriptions.Item label="Статус">
                     <Tag
@@ -205,7 +215,6 @@ export const MovementDetailsPage: React.FC = () => {
                     label={
                       <span
                         style={{
-                          // marginLeft: 8,
                           color: "#016fc4ff",
                           cursor: "pointer",
                           fontSize: 16,
@@ -261,7 +270,6 @@ export const MovementDetailsPage: React.FC = () => {
       </Spin>
 
       <Modal
-        className="page-modal"
         title="Введите комментарий"
         open={isCommentModalVisible}
         onOk={handleAcceptWithComment}

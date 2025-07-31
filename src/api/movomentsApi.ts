@@ -4,8 +4,10 @@ export interface IMovementsResponse {
   total: number;
   data: IMovement[];
 }
+
 export interface IMovement {
   sender: string;
+  recipient?: string; // Добавляем получателя
   date: string; //ts
   user: string;
   status: string;
@@ -16,6 +18,7 @@ export interface IMovement {
 export interface IMovementDetails {
   id: string;
   sender: string;
+  recipient?: string; // Добавляем получателя
   date: string;
   order: string;
   user: string;
@@ -29,6 +32,16 @@ export interface IProduct {
   batch?: string;
 }
 
+export interface ICreateMovementRequest {
+  date: string; // Формат: "YYYY-MM-DDTHH:mm:ss"
+  recipient: string; // ID получателя
+  products: Array<{
+    id: string;
+    qt: number;
+    date: string; // timestamp как строка
+  }>;
+}
+
 export const fetchMovoments = async (params: {
   limit: number;
   offset: number;
@@ -36,7 +49,7 @@ export const fetchMovoments = async (params: {
   const url = process.env.REACT_APP_API_URL;
   const token = localStorage.getItem("token");
 
-  const response = await axiosInstance.get(`${url}movements/all'`, {
+  const response = await axiosInstance.get(`${url}movements/all`, {
     params,
     headers: {
       token: token,
@@ -91,4 +104,23 @@ export const acceptMovement = async (
   } catch (error) {
     throw error;
   }
+};
+
+export const createMovement = async (
+  movementData: ICreateMovementRequest
+): Promise<{ success: boolean }> => {
+  const url = process.env.REACT_APP_API_URL;
+  const token = localStorage.getItem("token");
+
+  const response = await axiosInstance.post(
+    `${url}movements/add`,
+    movementData,
+    {
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return response.data;
 };

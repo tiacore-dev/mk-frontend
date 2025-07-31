@@ -1,11 +1,14 @@
 "use client";
 
-import React from "react";
-import { Table, Spin, Alert, Tag } from "antd";
+import type React from "react";
+import { useState } from "react";
+import { Table, Spin, Alert, Tag, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 import { useMovementsQuery } from "../../hooks/movements/useMovementsQuery";
 import type { IMovement } from "../../api/movomentsApi";
+import { PlusOutlined } from "@ant-design/icons";
+import { MovementFormModal } from "./movementFormModal";
 import "../../styles/pageStyles.css";
 
 const STATUS_COLORS = {
@@ -17,10 +20,11 @@ const STATUS_COLORS = {
 
 export const MovementsPage: React.FC = () => {
   const navigate = useNavigate();
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
   });
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { data, isLoading, isError, error } = useMovementsQuery({
     limit: pagination.pageSize,
@@ -29,9 +33,15 @@ export const MovementsPage: React.FC = () => {
 
   const columns: ColumnsType<IMovement> = [
     {
-      title: "Производитель",
+      title: "Отправитель",
       dataIndex: "sender",
       key: "sender",
+    },
+    {
+      title: "Получатель",
+      dataIndex: "recipient",
+      key: "recipient",
+      render: (recipient: string) => recipient || "-",
     },
     {
       title: "Дата приема",
@@ -73,6 +83,15 @@ export const MovementsPage: React.FC = () => {
     <div className="page-container">
       <div className="page-header">
         <h2 className="page-title">Список перемещений</h2>
+        <div className="page-actions">
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => setIsModalVisible(true)}
+          >
+            Добавить перемещение
+          </Button>
+        </div>
       </div>
 
       {isError && (
@@ -110,6 +129,12 @@ export const MovementsPage: React.FC = () => {
           />
         </Spin>
       </div>
+
+      <MovementFormModal
+        visible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        onSuccess={() => setIsModalVisible(false)}
+      />
     </div>
   );
 };
