@@ -211,23 +211,12 @@ export const MovementDetailsPage: React.FC = () => {
                   <Descriptions.Item label="Пользователь">
                     {movement.user}
                   </Descriptions.Item>
-                  <Descriptions.Item
-                    label={
-                      <span
-                        style={{
-                          color: "#016fc4ff",
-                          cursor: "pointer",
-                          fontSize: 16,
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/orders/${movement.order}`);
-                        }}
-                      >
-                        Заявка
-                        <ExportOutlined
+
+                  {!movement.recipient && (
+                    <Descriptions.Item
+                      label={
+                        <span
                           style={{
-                            marginLeft: 8,
                             color: "#016fc4ff",
                             cursor: "pointer",
                             fontSize: 16,
@@ -236,12 +225,26 @@ export const MovementDetailsPage: React.FC = () => {
                             e.stopPropagation();
                             navigate(`/orders/${movement.order}`);
                           }}
-                        />
-                      </span>
-                    }
-                  >
-                    {""}
-                  </Descriptions.Item>
+                        >
+                          Заявка
+                          <ExportOutlined
+                            style={{
+                              marginLeft: 8,
+                              color: "#016fc4ff",
+                              cursor: "pointer",
+                              fontSize: 16,
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/orders/${movement.order}`);
+                            }}
+                          />
+                        </span>
+                      }
+                    >
+                      {""}
+                    </Descriptions.Item>
+                  )}
                 </Descriptions>
 
                 <Title
