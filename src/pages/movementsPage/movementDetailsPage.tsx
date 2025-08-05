@@ -22,7 +22,9 @@ import {
   CheckOutlined,
   ArrowLeftOutlined,
   ExportOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
+import { PrintMovement, printMovementStyles } from "./printMovement";
 import "../../styles/pageStyles.css";
 
 const { Title, Text } = Typography;
@@ -33,6 +35,7 @@ export const MovementDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const [comment, setComment] = useState("");
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
+  const [isPrintModalVisible, setIsPrintModalVisible] = useState(false);
 
   const acceptMovementMutation = useAcceptMovement();
 
@@ -83,6 +86,54 @@ export const MovementDetailsPage: React.FC = () => {
     } catch (error) {}
   };
 
+  const openPrintModal = () => {
+    setIsPrintModalVisible(true);
+  };
+
+  const handlePrint = () => {
+    const printContent = document.getElementById("print-content");
+    if (!printContent) return;
+
+    const styles = printMovementStyles;
+    const printWindow = document.createElement("iframe");
+
+    printWindow.style.position = "absolute";
+    printWindow.style.width = "0";
+    printWindow.style.height = "0";
+    printWindow.style.border = "none";
+    printWindow.style.left = "-9999px";
+
+    document.body.appendChild(printWindow);
+
+    const doc = printWindow.contentDocument;
+    if (doc) {
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Печать перемещения</title>
+            <style>${styles}</style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+            <script>
+              setTimeout(function() {
+                window.print();
+                setTimeout(function() {
+                  window.frameElement.parentNode.removeChild(window.frameElement);
+                }, 100);
+              }, 100);
+            </script>
+          </body>
+        </html>
+      `);
+      doc.close();
+    } else {
+      document.body.removeChild(printWindow);
+    }
+  };
+
   const productColumns = [
     {
       title: "Название",
@@ -127,7 +178,7 @@ export const MovementDetailsPage: React.FC = () => {
   // Принимать может только получатель и только если статус "В работе"
   const canConfirm =
     movement?.status === "В работе" && movement?.recipient === currentUserId;
-
+  const canPrint = movement?.sender === currentUserId;
   return (
     <div className="page-container">
       <Spin spinning={isLoading}>
@@ -173,6 +224,15 @@ export const MovementDetailsPage: React.FC = () => {
                         Принять с корректировкой
                       </Button>
                     </>
+                  )}
+                  {canPrint && (
+                    <Button
+                      type="primary"
+                      icon={<PrinterOutlined />}
+                      onClick={openPrintModal}
+                    >
+                      Печать
+                    </Button>
                   )}
                 </div>
               </div>
@@ -290,6 +350,43 @@ export const MovementDetailsPage: React.FC = () => {
           onChange={(e) => setComment(e.target.value)}
           placeholder="Введите комментарий..."
         />
+      </Modal>
+
+      <Modal
+        className="page-modal"
+        open={isPrintModalVisible}
+        onCancel={() => setIsPrintModalVisible(false)}
+        width={800}
+        footer={[
+          <Button key="cancel" onClick={() => setIsPrintModalVisible(false)}>
+            Отменить
+          </Button>,
+          <Button
+            key="print"
+            type="primary"
+            icon={<PrinterOutlined />}
+            onClick={handlePrint}
+          >
+            Печать
+          </Button>,
+        ]}
+      >
+        {movement && (
+          <PrintMovement
+            data={{
+              id: movement.id,
+              date: movement.date,
+              user: movement.user,
+              sender: movement.sender,
+              recipient: movement.recipient,
+              status: movement.status,
+              products: movement.products,
+              order: movement.order,
+            }}
+            productsMap={productsMap}
+            userData={userData}
+          />
+        )}
       </Modal>
     </div>
   );
