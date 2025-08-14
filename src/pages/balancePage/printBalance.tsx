@@ -128,7 +128,7 @@ export const printInventoryStyles = `
   @media print {
     body {
       margin: 0;
-      padding: 20px;
+      padding: 10px !important; // Уменьшен отступ
       font-family: Arial, sans-serif;
       -webkit-print-color-adjust: exact;
     }
@@ -146,13 +146,14 @@ export const printInventoryStyles = `
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 16px 0;
+      margin: 10px 0 !important;
       page-break-inside: auto;
+      font-size: 14px !important; // Уменьшен размер шрифта
     }
     
     th, td {
       border: 1px solid #000;
-      padding: 8px;
+      padding: 6px !important; // Уменьшен padding
       text-align: left;
     }
     
@@ -162,14 +163,30 @@ export const printInventoryStyles = `
     }
     
     h3 {
-      font-size: 18px;
+      font-size: 16px !important; // Уменьшен размер заголовка
       font-weight: bold;
-      margin-bottom: 16px;
+      margin-bottom: 12px !important;
       text-align: center;
     }
     
     .ant-modal {
       display: none !important;
+    }
+    
+    .ant-table {
+      font-size: 12px !important;
+    }
+    
+    .ant-table-thead > tr > th {
+      padding: 8px !important;
+    }
+    
+    .ant-table-tbody > tr > td {
+      padding: 6px !important;
+    }
+    
+    @page {
+      margin: 10mm !important; // Уменьшены отступы страницы
     }
   }
 `;
