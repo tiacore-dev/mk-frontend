@@ -81,6 +81,7 @@ export const PrintReport: React.FC<PrintReportProps> = ({
             title: "Наименование товара",
             dataIndex: "productName",
             key: "productName",
+            width: 250, // Увеличена ширина первого столбца
             render: (text: string) => (
               <Typography.Text strong>{text}</Typography.Text>
             ),
@@ -90,42 +91,49 @@ export const PrintReport: React.FC<PrintReportProps> = ({
             dataIndex: "startBalance",
             key: "startBalance",
             align: "center",
+            width: 80,
           },
           {
             title: "Заказано",
             dataIndex: "order",
             key: "order",
             align: "center",
+            width: 70,
           },
           {
             title: "Поступило",
             dataIndex: "received",
             key: "received",
             align: "center",
+            width: 70,
           },
           {
             title: "Продано",
             dataIndex: "sold",
             key: "sold",
             align: "center",
+            width: 70,
           },
           {
             title: "Списано",
             dataIndex: "writtenOff",
             key: "writtenOff",
             align: "center",
+            width: 70,
           },
           {
             title: "Конечный остаток",
             dataIndex: "endBalance",
             key: "endBalance",
             align: "center",
+            width: 80,
           },
           {
             title: "% остатка",
             dataIndex: "balanceRate",
             key: "balanceRate",
             align: "center",
+            width: 70,
             render: (value: number) => `${value}%`,
           },
         ]}
@@ -167,9 +175,10 @@ export const PrintReport: React.FC<PrintReportProps> = ({
 
       <div
         style={{
-          marginTop: 48,
+          marginTop: 24, // Уменьшен отступ сверху
           display: "flex",
           justifyContent: "space-between",
+          pageBreakInside: "avoid", // Запрет переноса на следующую страницу
         }}
       >
         <div>
@@ -195,7 +204,7 @@ export const printReportStyles = `
   @media print {
     body {
       margin: 0;
-      padding: 20px;
+      padding: 10px !important; // Уменьшен отступ
       font-family: Arial, sans-serif;
       -webkit-print-color-adjust: exact;
     }
@@ -213,13 +222,14 @@ export const printReportStyles = `
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 16px 0;
+      margin: 10px 0 !important;
       page-break-inside: auto;
+      font-size: 14px !important; // Уменьшен размер шрифта
     }
     
     th, td {
       border: 1px solid #000;
-      padding: 8px;
+      padding: 6px !important; // Уменьшен padding
       text-align: left;
     }
     
@@ -229,14 +239,30 @@ export const printReportStyles = `
     }
     
     h3 {
-      font-size: 18px;
+      font-size: 16px !important; // Уменьшен размер заголовка
       font-weight: bold;
-      margin-bottom: 16px;
+      margin-bottom: 12px !important;
       text-align: center;
     }
     
     .ant-modal {
       display: none !important;
+    }
+    
+    .ant-table {
+      font-size: 12px !important;
+    }
+    
+    .ant-table-thead > tr > th {
+      padding: 8px !important;
+    }
+    
+    .ant-table-tbody > tr > td {
+      padding: 6px !important;
+    }
+    
+    @page {
+      margin: 10mm !important; // Уменьшены отступы страницы
     }
   }
 `;
