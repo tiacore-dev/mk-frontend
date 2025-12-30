@@ -60,6 +60,21 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
 
   const allOrders = allOrdersResponse?.data || [];
 
+  const isHolidayWindow = (current: Dayjs) => {
+    const year = current.year();
+    const startYear = current.month() === 0 ? year - 1 : year;
+    const endYear = startYear + 1;
+    const start = dayjs(new Date(startYear, 11, 27)).endOf("day");
+    const end = dayjs(new Date(endYear, 0, 3)).startOf("day");
+    return current.isAfter(start) && current.isBefore(end);
+  };
+
+  const today = dayjs().startOf("day");
+  const minOffsetDays = 3;
+  const availableDays = isHolidayWindow(today) ? 10 : 5;
+  const minDate = today.add(minOffsetDays, "day");
+  const maxDate = today.add(minOffsetDays + availableDays - 1, "day");
+
   const handleKeyDown = (
     recordId: string,
     e: React.KeyboardEvent<HTMLInputElement>
@@ -219,10 +234,6 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
   }, [visible, productsData, order, isEditMode, form]);
 
   const disabledDate = (current: Dayjs) => {
-    const today = dayjs().startOf("day");
-    const minDate = today.add(3, "day");
-    const maxDate = today.add(6, "day");
-
     // Проверяем, что дата входит в допустимый диапазон
     return current && (current < minDate || current > maxDate);
   };
@@ -290,9 +301,8 @@ export const OrderFormModal: React.FC<IOrderFormModalProps> = ({
 
             <div style={{ marginBottom: 16 }}>
               <Text type="secondary">
-                Доступные даты: от {dayjs().add(3, "day").format(DATE_FORMAT)}
-                до {dayjs().add(6, "day").format(DATE_FORMAT)} (кроме уже
-                занятых)
+                Доступные даты: от {minDate.format(DATE_FORMAT)} до{" "}
+                {maxDate.format(DATE_FORMAT)} (кроме уже занятых)
               </Text>
             </div>
           </>
