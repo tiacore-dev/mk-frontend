@@ -37,7 +37,7 @@ interface TableDataItem {
   total: number;
   items: IBalanceItem[];
   hasBalance: boolean;
-  initialSold: number;
+  // initialSold: number;
 }
 
 export const BalancePage: React.FC = () => {
@@ -62,7 +62,7 @@ export const BalancePage: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editableItems, setEditableItems] = useState<IBalanceItem[]>([]);
   const [originalItems, setOriginalItems] = useState<IBalanceItem[]>([]);
-  const [initialSold, setInitialSold] = useState(0);
+  // const [initialSold, setInitialSold] = useState(0);
   const [isPrintModalVisible, setIsPrintModalVisible] = useState(false);
   const [printData, setPrintData] = useState<TableDataItem[]>([]);
 
@@ -78,15 +78,22 @@ export const BalancePage: React.FC = () => {
       (
         acc: Record<
           string,
-          { total: number; items: IBalanceItem[]; initialSold: number }
+          { total: number; 
+            items: IBalanceItem[]; 
+            // initialSold: number 
+          }
         >,
         item
       ) => {
         if (!acc[item.product])
-          acc[item.product] = { total: 0, items: [], initialSold: 0 };
+          acc[item.product] = { 
+        total: 0, 
+        items: [], 
+        // initialSold: 0 
+      };
 
         if (item.date === null) {
-          acc[item.product].initialSold = Math.abs(item.qt);
+          // acc[item.product].initialSold = Math.abs(item.qt);
           acc[item.product].total += item.qt;
         } else {
           acc[item.product].total += item.qt;
@@ -102,7 +109,7 @@ export const BalancePage: React.FC = () => {
       const balanceInfo = grouped[productId] || {
         total: 0,
         items: [],
-        initialSold: 0,
+        // initialSold: 0,
       };
 
       return {
@@ -111,16 +118,17 @@ export const BalancePage: React.FC = () => {
         product: product.name,
         total: balanceInfo.total,
         items: balanceInfo.items,
-        initialSold: balanceInfo.initialSold,
-        hasBalance: balanceInfo.items.length > 0 || balanceInfo.initialSold > 0,
+        // initialSold: balanceInfo.initialSold,
+        hasBalance: balanceInfo.items.length > 0 
+        // || balanceInfo.initialSold > 0,
       };
     });
 
-    allProductsData.sort((a, b) => {
-      const aEditable = a.initialSold > 0 ? 1 : 0;
-      const bEditable = b.initialSold > 0 ? 1 : 0;
-      return bEditable - aEditable;
-    });
+    // allProductsData.sort((a, b) => {
+      // const aEditable = a.initialSold > 0 ? 1 : 0;
+      // const bEditable = b.initialSold > 0 ? 1 : 0;
+      // return bEditable - aEditable;
+    // });
 
     return {
       groupedData: grouped,
@@ -130,7 +138,7 @@ export const BalancePage: React.FC = () => {
 
   const openEditModal = (productId: string) => {
     const items = groupedData[productId]?.items || [];
-    const sold = groupedData[productId]?.initialSold || 0;
+    // const sold = groupedData[productId]?.initialSold || 0;
 
     // Сортируем элементы по дате (от новых к старым)
     const sortedItems = [...items].sort((a, b) => {
@@ -141,7 +149,7 @@ export const BalancePage: React.FC = () => {
     setSelectedProductId(productId);
     setOriginalItems(sortedItems.map((item) => ({ ...item })));
     setEditableItems(sortedItems.map((item) => ({ ...item })));
-    setInitialSold(sold);
+    // setInitialSold(sold);
     setIsModalVisible(true);
   };
 
@@ -263,7 +271,7 @@ export const BalancePage: React.FC = () => {
           type="link"
           icon={<EditOutlined />}
           onClick={() => openEditModal(record.productId)}
-          disabled={record.initialSold <= 0}
+          // disabled={record.initialSold <= 0}
         />
       ),
     },
@@ -325,7 +333,8 @@ export const BalancePage: React.FC = () => {
   const isError = isBalanceError || isProductsError;
   const error = balanceError || productsError;
   const totalReduction = getTotalReduction();
-  const isSaveDisabled = initialSold > 0 && totalReduction !== initialSold;
+  // const isSaveDisabled = initialSold > 0 && totalReduction !== initialSold;
+  
 
   return (
     <div className="page-container" id="no-click">
@@ -384,11 +393,13 @@ export const BalancePage: React.FC = () => {
               <span
                 style={{
                   fontWeight: 400,
-                  color: totalReduction > initialSold ? "#ff4d4f" : "inherit",
+                  // color: totalReduction > initialSold ? "#ff4d4f" : "inherit",
+                  color: "inherit",
                 }}
               >
                 {" "}
-                {totalReduction} из {initialSold}
+                {totalReduction} 
+                {/* из {initialSold} */}
               </span>
             </div>
             <Space>
@@ -413,7 +424,8 @@ export const BalancePage: React.FC = () => {
                 icon={<SaveOutlined />}
                 disabled={
                   JSON.stringify(editableItems) ===
-                    JSON.stringify(originalItems) || isSaveDisabled
+                    JSON.stringify(originalItems) 
+                    // || isSaveDisabled
                 }
               >
                 Сохранить
