@@ -26,6 +26,8 @@ export const PrintReport: React.FC<PrintReportProps> = ({
       startBalance: acc.startBalance + item.startBalance,
       order: acc.order + item.order,
       received: acc.received + item.received,
+      internalReceived: acc.internalReceived + item.internalReceived,
+      internalSended: acc.internalSended + item.internalSended,
       sold: acc.sold + item.sold,
       writtenOff: acc.writtenOff + item.writtenOff,
       endBalance: acc.endBalance + item.endBalance,
@@ -34,11 +36,19 @@ export const PrintReport: React.FC<PrintReportProps> = ({
       startBalance: 0,
       order: 0,
       received: 0,
+      internalReceived: 0,
+      internalSended: 0,
       sold: 0,
       writtenOff: 0,
       endBalance: 0,
     }
   );
+  const totalWrittenOffRate =
+    totals.startBalance + totals.received > 0
+      ? Math.round(
+          (totals.writtenOff / (totals.startBalance + totals.received)) * 10000
+        ) / 100
+      : 0;
 
   return (
     <div id="print-content">
@@ -81,7 +91,7 @@ export const PrintReport: React.FC<PrintReportProps> = ({
             title: "Наименование товара",
             dataIndex: "productName",
             key: "productName",
-            width: 250, // Увеличена ширина первого столбца
+            width: 200,
             render: (text: string) => (
               <Typography.Text strong>{text}</Typography.Text>
             ),
@@ -104,6 +114,20 @@ export const PrintReport: React.FC<PrintReportProps> = ({
             title: "Поступило",
             dataIndex: "received",
             key: "received",
+            align: "center",
+            width: 70,
+          },
+          {
+            title: "Получено от ПВ",
+            dataIndex: "internalReceived",
+            key: "internalReceived",
+            align: "center",
+            width: 70,
+          },
+          {
+            title: "Передано на ПВ",
+            dataIndex: "internalSended",
+            key: "internalSended",
             align: "center",
             width: 70,
           },
@@ -136,6 +160,14 @@ export const PrintReport: React.FC<PrintReportProps> = ({
             width: 70,
             render: (value: number) => `${value}%`,
           },
+          {
+            title: "% списания",
+            dataIndex: "writtenOffRate",
+            key: "writtenOffRate",
+            align: "center",
+            width: 70,
+            render: (value: number) => `${value}%`,
+          },
         ]}
         pagination={false}
         rowKey="productId"
@@ -157,16 +189,29 @@ export const PrintReport: React.FC<PrintReportProps> = ({
                 <Typography.Text strong>{totals.received}</Typography.Text>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={4} align="center">
-                <Typography.Text strong>{totals.sold}</Typography.Text>
+                <Typography.Text strong>
+                  {totals.internalReceived}
+                </Typography.Text>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={5} align="center">
-                <Typography.Text strong>{totals.writtenOff}</Typography.Text>
+                <Typography.Text strong>
+                  {totals.internalSended}
+                </Typography.Text>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={6} align="center">
-                <Typography.Text strong>{totals.endBalance}</Typography.Text>
+                <Typography.Text strong>{totals.sold}</Typography.Text>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={7} align="center">
+                <Typography.Text strong>{totals.writtenOff}</Typography.Text>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={8} align="center">
+                <Typography.Text strong>{totals.endBalance}</Typography.Text>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={9} align="center">
                 <Typography.Text strong>-</Typography.Text>
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={10} align="center">
+                <Typography.Text strong>{totalWrittenOffRate}%</Typography.Text>
               </Table.Summary.Cell>
             </Table.Summary.Row>
           </Table.Summary>
@@ -175,10 +220,10 @@ export const PrintReport: React.FC<PrintReportProps> = ({
 
       <div
         style={{
-          marginTop: 24, // Уменьшен отступ сверху
+          marginTop: 24,
           display: "flex",
           justifyContent: "space-between",
-          pageBreakInside: "avoid", // Запрет переноса на следующую страницу
+          pageBreakInside: "avoid",
         }}
       >
         <div>
@@ -204,7 +249,7 @@ export const printReportStyles = `
   @media print {
     body {
       margin: 0;
-      padding: 10px !important; // Уменьшен отступ
+      padding: 10px !important;
       font-family: Arial, sans-serif;
       -webkit-print-color-adjust: exact;
     }
@@ -224,12 +269,12 @@ export const printReportStyles = `
       border-collapse: collapse;
       margin: 10px 0 !important;
       page-break-inside: auto;
-      font-size: 14px !important; // Уменьшен размер шрифта
+      font-size: 11px !important;
     }
     
     th, td {
       border: 1px solid #000;
-      padding: 6px !important; // Уменьшен padding
+      padding: 4px !important;
       text-align: left;
     }
     
@@ -239,7 +284,7 @@ export const printReportStyles = `
     }
     
     h3 {
-      font-size: 16px !important; // Уменьшен размер заголовка
+      font-size: 16px !important;
       font-weight: bold;
       margin-bottom: 12px !important;
       text-align: center;
@@ -250,19 +295,20 @@ export const printReportStyles = `
     }
     
     .ant-table {
-      font-size: 12px !important;
+      font-size: 10px !important;
     }
     
     .ant-table-thead > tr > th {
-      padding: 8px !important;
+      padding: 5px !important;
     }
     
     .ant-table-tbody > tr > td {
-      padding: 6px !important;
+      padding: 4px !important;
     }
     
     @page {
-      margin: 10mm !important; // Уменьшены отступы страницы
+      size: A4 landscape;
+      margin: 10mm !important;
     }
   }
 `;

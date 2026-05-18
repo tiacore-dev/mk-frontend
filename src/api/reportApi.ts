@@ -4,7 +4,9 @@ export interface IReportProductData {
   productId: string; // id продукта
   startBalance: number; // остаток на начало дня шт
   order: number; // заказано шт
-  received: number; // поступило шт
+  received: number; // поступило от производства шт
+  internalSended: number; // передано на ПВ шт
+  internalReceived: number; // поступило от ПВ шт
   sold: number; // продано шт
   writtenOff: number; // списано шт
   endBalance: number; // остаток на конец дня шт

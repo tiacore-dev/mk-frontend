@@ -28,6 +28,8 @@ export interface IReportTableData {
   startBalance: number;
   order: number;
   received: number;
+  internalSended: number;
+  internalReceived: number;
   sold: number;
   writtenOff: number;
   endBalance: number;
@@ -86,6 +88,8 @@ export const ReportPage: React.FC = () => {
         startBalance: data.startBalance,
         order: data.order,
         received: data.received,
+        internalReceived: data.internalReceived,
+        internalSended: data.internalSended,
         sold: data.sold,
         writtenOff: data.writtenOff,
         endBalance: data.endBalance,
@@ -146,6 +150,44 @@ export const ReportPage: React.FC = () => {
       title: "Поступило",
       dataIndex: "received",
       key: "received",
+      width: 100,
+      align: "center",
+      render: (value: number) => (
+        <div
+          style={{
+            backgroundColor: value > 0 ? "#f6ffed" : "#f6f6f6",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontWeight: "500",
+          }}
+        >
+          {value}
+        </div>
+      ),
+    },
+    {
+      title: "Получено от ПВ",
+      dataIndex: "internalReceived",
+      key: "internalReceived",
+      width: 100,
+      align: "center",
+      render: (value: number) => (
+        <div
+          style={{
+            backgroundColor: value > 0 ? "#f6ffed" : "#f6f6f6",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontWeight: "500",
+          }}
+        >
+          {value}
+        </div>
+      ),
+    },
+    {
+      title: "Передано на ПВ",
+      dataIndex: "internalSended",
+      key: "internalSended",
       width: 100,
       align: "center",
       render: (value: number) => (
@@ -307,6 +349,8 @@ export const ReportPage: React.FC = () => {
         startBalance: acc.startBalance + item.startBalance,
         order: acc.order + item.order,
         received: acc.received + item.received,
+        internalReceived: acc.internalReceived + item.internalReceived,
+        internalSended: acc.internalSended + item.internalSended,
         sold: acc.sold + item.sold,
         writtenOff: acc.writtenOff + item.writtenOff,
         endBalance: acc.endBalance + item.endBalance,
@@ -315,6 +359,8 @@ export const ReportPage: React.FC = () => {
         startBalance: 0,
         order: 0,
         received: 0,
+        internalReceived: 0,
+        internalSended: 0,
         sold: 0,
         writtenOff: 0,
         endBalance: 0,
@@ -427,7 +473,7 @@ export const ReportPage: React.FC = () => {
             columns={columns}
             dataSource={tableData}
             pagination={false}
-            scroll={{ x: 1000 }}
+            scroll={{ x: 1280 }}
             bordered
             size="small"
             summary={() =>
@@ -447,18 +493,24 @@ export const ReportPage: React.FC = () => {
                       <Text strong>{totals.received}</Text>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={4} align="center">
-                      <Text strong>{totals.sold}</Text>
+                      <Text strong>{totals.internalReceived}</Text>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={5} align="center">
-                      <Text strong>{totals.writtenOff}</Text>
+                      <Text strong>{totals.internalSended}</Text>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={6} align="center">
-                      <Text strong>{totals.endBalance}</Text>
+                      <Text strong>{totals.sold}</Text>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={7} align="center">
-                      <Text strong>-</Text>
+                      <Text strong>{totals.writtenOff}</Text>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={8} align="center">
+                      <Text strong>{totals.endBalance}</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={9} align="center">
+                      <Text strong>-</Text>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={10} align="center">
                       <Text strong>
                         {" "}
                         {totals.startBalance + totals.received > 0
@@ -494,7 +546,7 @@ export const ReportPage: React.FC = () => {
       <Modal
         open={isPrintModalVisible}
         onCancel={() => setIsPrintModalVisible(false)}
-        width={800}
+        width={1100}
         footer={[
           <Button key="cancel" onClick={() => setIsPrintModalVisible(false)}>
             Отменить
