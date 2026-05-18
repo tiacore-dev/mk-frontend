@@ -146,6 +146,12 @@ export const MovementDetailsPage: React.FC = () => {
       ),
     },
     {
+      title: "Партия",
+      dataIndex: "batch",
+      key: "batch",
+      render: (text: string) => <Text>{text}</Text>,
+    },
+     {
       title: "Количество (шт.)",
       dataIndex: "qt",
       key: "quantity",
