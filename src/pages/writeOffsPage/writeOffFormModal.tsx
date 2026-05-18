@@ -27,6 +27,17 @@ import {
 const { Text } = Typography;
 const { Option } = Select;
 
+const WRITE_OFF_REASON_OTHER = "Иная причина (указать в комментарии)";
+const WRITE_OFF_REASONS = [
+  "Истечение срока годности",
+  "Бой",
+  "Бракераж",
+  "Брак",
+  "Представительские расходы",
+  "Передано в бюджет",
+  WRITE_OFF_REASON_OTHER,
+];
+
 interface IWriteOffFormModalProps {
   visible: boolean;
   onCancel: () => void;
@@ -41,6 +52,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
   write_off,
 }) => {
   const [form] = Form.useForm();
+  const selectedWriteOffReason = Form.useWatch("writeOffReason", form);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [productDates, setProductDates] = useState<Record<string, string>>({});
   const { data: productsData, isLoading: isProductsLoading } =
@@ -56,7 +68,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
   const minDate = today.add(minOffsetDays, "day");
   const maxDate = today.add(minOffsetDays + availableDays - 1, "day");
 
-const disabledDate = (current: Dayjs) => {
+  const disabledDate = (current: Dayjs) => {
     return current && (current < minDate || current > maxDate);
   };
 
@@ -220,9 +232,13 @@ const disabledDate = (current: Dayjs) => {
       } else {
         // Режим создания
         const formattedDate = values.date?.format("YYYY-MM-DDTHH:mm:ss");
+        const description =
+          values.writeOffReason === WRITE_OFF_REASON_OTHER
+            ? values.writeOffComment
+            : values.writeOffReason;
         const writeOffData: ICreateWriteOffsRequest = {
           date: formattedDate,
-          description: values.description,
+          description,
           products,
         };
 
@@ -335,17 +351,49 @@ const disabledDate = (current: Dayjs) => {
             </Form.Item>
 
             <Form.Item
-              label="Описание"
-              name="description"
+              label="Причина списания"
+              name="writeOffReason"
               rules={[
-                { required: true, message: "Пожалуйста, введите описание" },
+                {
+                  required: true,
+                  message: "Пожалуйста, выберите причину списания",
+                },
               ]}
             >
-              <Input.TextArea
-                rows={3}
-                placeholder="Введите описание списания"
-              />
+              <Select
+                placeholder="Выберите причину списания"
+                onChange={(value) => {
+                  if (value !== WRITE_OFF_REASON_OTHER) {
+                    form.setFieldValue("writeOffComment", undefined);
+                  }
+                }}
+              >
+                {WRITE_OFF_REASONS.map((reason) => (
+                  <Option key={reason} value={reason}>
+                    {reason}
+                  </Option>
+                ))}
+              </Select>
             </Form.Item>
+
+            {selectedWriteOffReason === WRITE_OFF_REASON_OTHER && (
+              <Form.Item
+                label="Комментарий"
+                name="writeOffComment"
+                rules={[
+                  {
+                    required: true,
+                    message: "Пожалуйста, введите комментарий",
+                  },
+                  {
+                    whitespace: true,
+                    message: "Комментарий не может быть пустым",
+                  },
+                ]}
+              >
+                <Input.TextArea rows={3} placeholder="Введите комментарий" />
+              </Form.Item>
+            )}
           </>
         ) : (
           <>
