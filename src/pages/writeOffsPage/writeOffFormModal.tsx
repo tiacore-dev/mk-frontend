@@ -18,7 +18,7 @@ import {
   useUpdateWriteOffMutation,
 } from "../../hooks/writeOffs/useWriteOffMutations";
 import { toast } from "react-hot-toast";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import {
   ICreateWriteOffsRequest,
   IWriteOffUpdateRequest,
@@ -49,6 +49,16 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
 
   const createMutation = useCreateWriteOffMutation();
   const updateMutation = useUpdateWriteOffMutation(write_off?.id);
+
+  const today = dayjs().startOf("day");
+  const minOffsetDays = 0;
+  const availableDays = 1;
+  const minDate = today.add(minOffsetDays, "day");
+  const maxDate = today.add(minOffsetDays + availableDays - 1, "day");
+
+const disabledDate = (current: Dayjs) => {
+    return current && (current < minDate || current > maxDate);
+  };
 
   const isEditMode = !!write_off;
 
@@ -320,6 +330,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
               <DatePicker
                 style={{ width: "100%" }}
                 placeholder="Выберите дату"
+                disabledDate={disabledDate}
               />
             </Form.Item>
 
