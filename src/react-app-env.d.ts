@@ -1,3 +1,6 @@
 /// <reference types="react-scripts" />
 
-declare module "*.css";
+declare module "*.css" {
+  const styles: string;
+  export default styles;
+}
