@@ -11,6 +11,7 @@ import {
   ShoppingCartOutlined,
   EditOutlined,
   BarChartOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 
 import logo from "../../logo.png";
@@ -31,6 +32,14 @@ const menuItems: MenuProps["items"] = [
       </>
     ),
     key: "/movements",
+  }, 
+  {
+    label: (
+      <>
+        <DollarOutlined /> Реализации
+      </>
+    ),
+    key: "/sales",
   },
   {
     label: (
@@ -48,6 +57,7 @@ const menuItems: MenuProps["items"] = [
     ),
     key: "/write_offs",
   },
+ 
   {
     label: (
       <>

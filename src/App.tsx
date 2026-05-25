@@ -23,6 +23,8 @@ import { BalancePage } from "./pages/balancePage/balancePage";
 import { WriteOffsPage } from "./pages/writeOffsPage/writeOffsPage";
 import { WriteOffDetailsPage } from "./pages/writeOffsPage/writeOffDetailsPage";
 import { ReportPage } from "./pages/reportPage/reportPage";
+import { SalesPage } from "./pages/salesPage/salesPage";
+import { SalesDetailsPage } from "./pages/salesPage/salesDetailsPage";
 
 dayjs.locale("ru");
 
@@ -39,6 +41,8 @@ const App: React.FC = () => {
               <Route element={<ProtectedRoute />}>
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/write_offs" element={<WriteOffsPage />} />
+                <Route path="/sales" element={<SalesPage />} />
+                <Route path="/sales/:id" element={<SalesDetailsPage />} />
                 <Route
                   path="/write_offs/:id"
                   element={<WriteOffDetailsPage />}
