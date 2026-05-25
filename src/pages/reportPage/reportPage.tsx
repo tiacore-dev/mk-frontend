@@ -72,13 +72,15 @@ export const ReportPage: React.FC = () => {
     if (!reportData || !productsData) return [];
 
     return reportData.map((data) => {
+
+      const income = data.startBalance + data.received + data.internalReceived - data.internalSended
       const balanceRate =
-        data.startBalance + data.received > 0
-          ? (data.endBalance / (data.startBalance + data.received)) * 100
+        income > 0
+          ? (data.endBalance / (income)) * 100
           : 0;
       const writtenOffRate =
-        data.startBalance + data.received > 0
-          ? (data.writtenOff / (data.startBalance + data.received)) * 100
+        income > 0
+          ? (data.writtenOff / (income)) * 100
           : 0;
 
       return {

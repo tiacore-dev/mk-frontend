@@ -8,7 +8,6 @@ import {
   Form,
   Button,
   Spin,
-  Alert,
   Select,
 } from "antd";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
@@ -63,8 +62,8 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
   const updateMutation = useUpdateWriteOffMutation(write_off?.id);
 
   const today = dayjs().startOf("day");
-  const minOffsetDays = 0;
-  const availableDays = 1;
+  const minOffsetDays = -1;
+  const availableDays = 2;
   const minDate = today.add(minOffsetDays, "day");
   const maxDate = today.add(minOffsetDays + availableDays - 1, "day");
 

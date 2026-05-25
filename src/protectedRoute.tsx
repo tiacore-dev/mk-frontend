@@ -10,7 +10,7 @@ const ProtectedRoute: React.FC = () => {
   useEffect(() => {
     const accessToken = localStorage.getItem("token");
     if (!accessToken) {
-      navigate("/login");
+      navigate("/client/login");
     }
   }, [navigate]);
 
