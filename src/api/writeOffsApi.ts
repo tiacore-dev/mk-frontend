@@ -86,6 +86,7 @@ export const createWriteOff = async (
 };
 
 export interface IWriteOffUpdateRequest {
+  description?: string;
   products: Array<{
     id: string;
     qt: number;

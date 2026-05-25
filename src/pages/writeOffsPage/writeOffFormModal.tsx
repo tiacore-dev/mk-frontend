@@ -9,6 +9,7 @@ import {
   Button,
   Spin,
   Select,
+  Alert,
 } from "antd";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import { useBalanceQuery } from "../../hooks/balance/useBalanceQuery";
@@ -36,6 +37,22 @@ const WRITE_OFF_REASONS = [
   "Передано в бюджет",
   WRITE_OFF_REASON_OTHER,
 ];
+
+const resolveWriteOffReasonFields = (description?: string) => {
+  const normalizedDescription = description || "";
+  const isKnownReason = WRITE_OFF_REASONS.includes(normalizedDescription);
+  const writeOffReason = isKnownReason
+    ? normalizedDescription
+    : WRITE_OFF_REASON_OTHER;
+
+  return {
+    writeOffReason,
+    writeOffComment:
+      writeOffReason === WRITE_OFF_REASON_OTHER
+        ? normalizedDescription || undefined
+        : undefined,
+  };
+};
 
 interface IWriteOffFormModalProps {
   visible: boolean;
@@ -78,11 +95,11 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
       return (
         balanceData?.reduce(
           (acc, item) => (item.product === productId ? acc + item.qt : acc),
-          0
+          0,
         ) ?? 0
       );
     },
-    [balanceData]
+    [balanceData],
   );
 
   const getAvailableDates = (productId: string): string[] => {
@@ -96,7 +113,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
   const getOldestDate = (dates: string[]): string | null => {
     if (dates.length === 0) return null;
     return dates.reduce((oldest, current) =>
-      new Date(current) < new Date(oldest) ? current : oldest
+      new Date(current) < new Date(oldest) ? current : oldest,
     );
   };
 
@@ -200,7 +217,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
         .map(([id, qt]) => {
           if (!productDates[id]) {
             throw new Error(
-              `Не выбрана дата партии для продукта ${productsMap[id]}`
+              `Не выбрана дата партии для продукта ${productsMap[id]}`,
             );
           }
           return {
@@ -216,10 +233,17 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
       }
 
       const values = await form.validateFields();
+      const description =
+        values.writeOffReason === WRITE_OFF_REASON_OTHER
+          ? values.writeOffComment
+          : values.writeOffReason;
 
       if (isEditMode) {
         // Режим редактирования
-        const writeOffData: IWriteOffUpdateRequest = { products };
+        const writeOffData: IWriteOffUpdateRequest = {
+          products,
+          description,
+        };
         updateMutation.mutate(writeOffData, {
           onSuccess: () => {
             onSuccess();
@@ -231,10 +255,6 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
       } else {
         // Режим создания
         const formattedDate = values.date?.format("YYYY-MM-DDTHH:mm:ss");
-        const description =
-          values.writeOffReason === WRITE_OFF_REASON_OTHER
-            ? values.writeOffComment
-            : values.writeOffReason;
         const writeOffData: ICreateWriteOffsRequest = {
           date: formattedDate,
           description,
@@ -278,10 +298,12 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
 
         setQuantities(initialQuantities);
         setProductDates(initialDates);
+        const reasonFields = resolveWriteOffReasonFields(write_off.description);
 
         form.setFieldsValue({
           date: write_off.date ? dayjs(write_off.date) : undefined,
-          description: write_off.description || "",
+          writeOffReason: reasonFields.writeOffReason,
+          writeOffComment: reasonFields.writeOffComment,
         });
       } else if (productsData) {
         const initialQuantities: Record<string, number> = {};
@@ -298,9 +320,10 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
     }
   }, [visible, productsData, write_off, isEditMode, form]);
 
-  // const hasNegativeBalance = useMemo(() => {
-  //   return balanceData?.some((item) => item.qt < 0);
-  // }, [balanceData]);
+  const hasNegativeBalance = useMemo(() => {
+    console.log(balanceData)
+    return balanceData?.some((item) => item.qt < 0);
+  }, [balanceData]);
 
   return (
     <Modal
@@ -316,7 +339,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
           type="primary"
           onClick={handleSubmit}
           loading={createMutation.isPending || updateMutation.isPending}
-          // disabled={hasNegativeBalance}
+          disabled={hasNegativeBalance}
         >
           {isEditMode ? "Сохранить изменения" : "Создать списание"}
         </Button>,
@@ -324,7 +347,7 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
       width={1000}
       destroyOnClose
     >
-      {/* {hasNegativeBalance && (
+      {hasNegativeBalance && (
         <Alert
           message="Внимание"
           description="Создание списаний недоступно, так как есть нераспределенные реализации (отрицательные остатки)."
@@ -332,87 +355,65 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
           showIcon
           style={{ marginBottom: 16 }}
         />
-      )} */}
+      )}
 
       <Form form={form} layout="vertical">
-        {!isEditMode ? (
-          <>
-            <Form.Item
-              label="Дата списания"
-              name="date"
-              rules={[{ required: true, message: "Пожалуйста, выберите дату" }]}
-            >
-              <DatePicker
-                style={{ width: "100%" }}
-                placeholder="Выберите дату"
-                disabledDate={disabledDate}
-              />
-            </Form.Item>
+        <Form.Item
+          label="Дата списания"
+          name="date"
+          rules={[{ required: true, message: "Пожалуйста, выберите дату" }]}
+        >
+          <DatePicker
+            style={{ width: "100%" }}
+            placeholder="Выберите дату"
+            disabledDate={isEditMode ? undefined : disabledDate}
+            disabled={isEditMode}
+          />
+        </Form.Item>
 
-            <Form.Item
-              label="Причина списания"
-              name="writeOffReason"
-              rules={[
-                {
-                  required: true,
-                  message: "Пожалуйста, выберите причину списания",
-                },
-              ]}
-            >
-              <Select
-                placeholder="Выберите причину списания"
-                onChange={(value) => {
-                  if (value !== WRITE_OFF_REASON_OTHER) {
-                    form.setFieldValue("writeOffComment", undefined);
-                  }
-                }}
-              >
-                {WRITE_OFF_REASONS.map((reason) => (
-                  <Option key={reason} value={reason}>
-                    {reason}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
+        <Form.Item
+          label="Причина списания"
+          name="writeOffReason"
+          rules={[
+            {
+              required: true,
+              message: "Пожалуйста, выберите причину списания",
+            },
+          ]}
+        >
+          <Select
+            placeholder="Выберите причину списания"
+            onChange={(value) => {
+              if (value !== WRITE_OFF_REASON_OTHER) {
+                form.setFieldValue("writeOffComment", undefined);
+              }
+            }}
+          >
+            {WRITE_OFF_REASONS.map((reason) => (
+              <Option key={reason} value={reason}>
+                {reason}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
 
-            {selectedWriteOffReason === WRITE_OFF_REASON_OTHER && (
-              <Form.Item
-                label="Комментарий"
-                name="writeOffComment"
-                rules={[
-                  {
-                    required: true,
-                    message: "Пожалуйста, введите комментарий",
-                  },
-                  {
-                    whitespace: true,
-                    message: "Комментарий не может быть пустым",
-                  },
-                ]}
-              >
-                <Input.TextArea rows={3} placeholder="Введите комментарий" />
-              </Form.Item>
-            )}
-          </>
-        ) : (
-          <>
-            <Form.Item label="Дата списания" name="date">
-              <DatePicker style={{ width: "100%" }} disabled />
-            </Form.Item>
-
-            <Form.Item
-              label="Описание"
-              name="description"
-              rules={[
-                { required: true, message: "Пожалуйста, введите описание" },
-              ]}
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Введите описание списания"
-              />
-            </Form.Item>
-          </>
+        {selectedWriteOffReason === WRITE_OFF_REASON_OTHER && (
+          <Form.Item
+            label="Комментарий"
+            name="writeOffComment"
+            rules={[
+              {
+                required: true,
+                message: "Пожалуйста, введите комментарий",
+              },
+              {
+                whitespace: true,
+                message: "Комментарий не может быть пустым",
+              },
+            ]}
+          >
+            <Input.TextArea rows={3} placeholder="Введите комментарий" />
+          </Form.Item>
         )}
 
         <Spin spinning={isProductsLoading || isBalanceLoading}>

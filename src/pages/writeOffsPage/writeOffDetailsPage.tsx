@@ -4,7 +4,6 @@ import type React from "react";
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Card,
   Spin,
   Alert,
   Button,
@@ -16,6 +15,7 @@ import {
 import { useWriteOffDetailsQuery } from "../../hooks/writeOffs/useWriteOffsQuery";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import { WriteOffFormModal } from "./writeOffFormModal";
+import dayjs from "dayjs";
 import {
   EditOutlined,
   ArrowLeftOutlined,
@@ -148,6 +148,15 @@ export const WriteOffDetailsPage: React.FC = () => {
   }
 
   const isLoading = isWriteOffLoading || isProductsLoading;
+  const canEditByDate = Boolean(
+    writeOff &&
+      (() => {
+        const writeOffDay = dayjs(writeOff.date).startOf("day");
+        const today = dayjs().startOf("day");
+        const yesterday = today.subtract(1, "day");
+        return writeOffDay.isSame(today) || writeOffDay.isSame(yesterday);
+      })()
+  );
 
   return (
     <div className="page-container">
@@ -187,6 +196,7 @@ export const WriteOffDetailsPage: React.FC = () => {
                     icon={<EditOutlined />}
                     type="primary"
                     onClick={() => setIsEditModalVisible(true)}
+                    disabled={!canEditByDate}
                   >
                     Редактировать
                   </Button>

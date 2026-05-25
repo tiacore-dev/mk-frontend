@@ -33,6 +33,7 @@ export const useUpdateWriteOffMutation = (id: string) => {
       updateWriteOff(id, orderData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["writeOffDetails", id] });
+      queryClient.invalidateQueries({ queryKey: ["writeOffs"] });
       queryClient.invalidateQueries({ queryKey: ["balance"] });
       toast.success("Списание успешно изменено");
     },
