@@ -128,15 +128,6 @@ export const SalesDetailsPage: React.FC = () => {
       <Spin spinning={isLoading}>
         {sale && (
           <>
-            {!canEdit && (
-              <Alert
-                message="Редактирование недоступно"
-                description={editBlockReason}
-                type="warning"
-                showIcon
-                style={{ marginBottom: 16 }}
-              />
-            )}
             <div className="detail-card">
               <div className="detail-card-header">
                 <Button
