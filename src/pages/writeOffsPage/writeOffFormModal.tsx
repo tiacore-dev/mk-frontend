@@ -10,6 +10,7 @@ import {
   Spin,
   Select,
   Alert,
+  InputNumber,
 } from "antd";
 import { useProductsQuery } from "../../hooks/products/useProductsQuery";
 import { useBalanceQuery } from "../../hooks/balance/useBalanceQuery";
@@ -90,11 +91,29 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
 
   const isEditMode = !!write_off;
 
-  const getAvailableQuantity = useCallback(
-    (productId: string) => {
+  const getOriginalWriteOffQuantity = useCallback(
+    (productId: string, date?: string) => {
+      if (!isEditMode || !write_off?.products) return 0;
+
+      return write_off.products.reduce(
+        (acc: number, product: any) =>
+          product.id === productId && (!date || product.date === date)
+            ? acc + (parseInt(product.qt) || 0)
+            : acc,
+        0,
+      );
+    },
+    [isEditMode, write_off],
+  );
+
+  const getBalanceQuantity = useCallback(
+    (productId: string, date?: string) => {
       return (
         balanceData?.reduce(
-          (acc, item) => (item.product === productId ? acc + item.qt : acc),
+          (acc, item) =>
+            item.product === productId && (!date || item.date === date)
+              ? acc + item.qt
+              : acc,
           0,
         ) ?? 0
       );
@@ -102,13 +121,49 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
     [balanceData],
   );
 
-  const getAvailableDates = (productId: string): string[] => {
-    return (
-      balanceData
-        ?.filter((item) => item.product === productId && item.date !== null)
-        .map((item) => item.date as string) || []
+  const getAvailableQuantity = useCallback(
+    (productId: string) => {
+      return Math.max(
+        0,
+        getBalanceQuantity(productId) + getOriginalWriteOffQuantity(productId),
+      );
+    },
+    [getBalanceQuantity, getOriginalWriteOffQuantity],
+  );
+
+  const getAvailableQuantityByDate = useCallback(
+    (productId: string, date: string) => {
+      return Math.max(
+        0,
+        getBalanceQuantity(productId, date) +
+          getOriginalWriteOffQuantity(productId, date),
     );
-  };
+    },
+    [getBalanceQuantity, getOriginalWriteOffQuantity],
+  );
+
+  const getAvailableDates = useCallback(
+    (productId: string): string[] => {
+      const balanceDates =
+        balanceData
+          ?.filter((item) => item.product === productId && item.date !== null)
+          .map((item) => item.date as string) || [];
+      const documentDates =
+        isEditMode && write_off?.products
+          ? write_off.products
+              .filter((product: any) => product.id === productId && product.date)
+              .map((product: any) => product.date as string)
+          : [];
+
+      return Array.from(new Set([...balanceDates, ...documentDates]))
+        .filter((date) => getAvailableQuantityByDate(productId, date) > 0)
+        .sort(
+          (firstDate, secondDate) =>
+            new Date(firstDate).getTime() - new Date(secondDate).getTime(),
+        );
+    },
+    [balanceData, getAvailableQuantityByDate, isEditMode, write_off],
+  );
 
   const getOldestDate = (dates: string[]): string | null => {
     if (dates.length === 0) return null;
@@ -118,21 +173,24 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
   };
 
   const handleQuantityChange = (productId: string, value: number) => {
-    const newQuantities = { ...quantities, [productId]: value };
+    const availableDates = getAvailableDates(productId);
+    const currentDate = productDates[productId];
+    const selectedDate =
+      currentDate && availableDates.includes(currentDate)
+        ? currentDate
+        : getOldestDate(availableDates);
+    const maxQuantity = selectedDate
+      ? getAvailableQuantityByDate(productId, selectedDate)
+      : getAvailableQuantity(productId);
+    const quantity = Math.min(Math.max(value, 0), maxQuantity);
+    const newQuantities = { ...quantities, [productId]: quantity };
     setQuantities(newQuantities);
 
-    if (value > 0) {
-      const availableDates = getAvailableDates(productId);
-      const oldestDate = getOldestDate(availableDates);
-
-      if (
-        oldestDate &&
-        (!productDates[productId] ||
-          !availableDates.includes(productDates[productId]))
-      ) {
+    if (quantity > 0) {
+      if (selectedDate && productDates[productId] !== selectedDate) {
         setProductDates((prev) => {
           const newDates = { ...prev };
-          newDates[productId] = oldestDate;
+          newDates[productId] = selectedDate;
           return newDates;
         });
       }
@@ -164,20 +222,26 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
     {
       title: "Количество (шт.)",
       key: "quantity",
-      render: (_: any, record: any) => (
-        <Input
-          type="number"
-          min={0}
-          max={getAvailableQuantity(record.id)}
-          value={quantities[record.id] || 0}
-          onChange={(e) => {
-            const value = parseInt(e.target.value) || 0;
-            handleQuantityChange(record.id, value);
-          }}
-          style={{ width: 100 }}
-          disabled={getAvailableQuantity(record.id) <= 0}
-        />
-      ),
+      render: (_: any, record: any) => {
+        const selectedDate = productDates[record.id];
+        const maxQuantity = selectedDate
+          ? getAvailableQuantityByDate(record.id, selectedDate)
+          : getAvailableQuantity(record.id);
+
+        return (
+          <InputNumber
+            min={0}
+            max={maxQuantity}
+            precision={0}
+            value={quantities[record.id] || 0}
+            onChange={(value) => {
+              handleQuantityChange(record.id, Number(value) || 0);
+            }}
+            style={{ width: 100 }}
+            disabled={getAvailableQuantity(record.id) <= 0}
+          />
+        );
+      },
     },
     {
       title: "Дата партии",
@@ -194,6 +258,13 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
               setProductDates((prev) => ({
                 ...prev,
                 [record.id]: value,
+              }));
+              setQuantities((prev) => ({
+                ...prev,
+                [record.id]: Math.min(
+                  prev[record.id] || 0,
+                  getAvailableQuantityByDate(record.id, value),
+                ),
               }));
             }}
             style={{ width: "100%" }}
@@ -215,15 +286,23 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
       const products = Object.entries(quantities)
         .filter(([_, quantity]) => quantity > 0)
         .map(([id, qt]) => {
-          if (!productDates[id]) {
+          const productDate = productDates[id];
+
+          if (!productDate) {
             throw new Error(
               `Не выбрана дата партии для продукта ${productsMap[id]}`,
+            );
+          }
+          const availableQuantity = getAvailableQuantityByDate(id, productDate);
+          if (qt > availableQuantity) {
+            throw new Error(
+              `Количество для ${productsMap[id]} не может быть больше остатка (${availableQuantity} шт.)`,
             );
           }
           return {
             id,
             qt,
-            date: productDates[id],
+            date: productDate,
           };
         });
 
@@ -321,7 +400,6 @@ export const WriteOffFormModal: React.FC<IWriteOffFormModalProps> = ({
   }, [visible, productsData, write_off, isEditMode, form]);
 
   const hasNegativeBalance = useMemo(() => {
-    console.log(balanceData)
     return balanceData?.some((item) => item.qt < 0);
   }, [balanceData]);
 

@@ -55,16 +55,33 @@ export const SalesFormModal: React.FC<ISalesFormModalProps> = ({
     return current && (current < minDate || current > maxDate);
   };
 
+  const getOriginalSaleQuantity = useCallback(
+    (productId: string) => {
+      if (!isEditMode || !sale?.products) return 0;
+
+      return sale.products.reduce(
+        (acc: number, product: any) =>
+          product.id === productId ? acc + (parseInt(product.qt) || 0) : acc,
+        0
+      );
+    },
+    [isEditMode, sale]
+  );
+
   const getAvailableQuantity = useCallback(
     (productId: string) => {
-      return (
+      const balanceQuantity =
         balanceData?.reduce(
           (acc, item) => (item.product === productId ? acc + item.qt : acc),
           0
-        ) ?? 0
+        ) ?? 0;
+
+      return Math.max(
+        0,
+        balanceQuantity + getOriginalSaleQuantity(productId)
       );
     },
-    [balanceData]
+    [balanceData, getOriginalSaleQuantity]
   );
 
   const handleSubmit = async () => {
@@ -85,6 +102,21 @@ export const SalesFormModal: React.FC<ISalesFormModalProps> = ({
       const hasInvalidSumm = products.some((product) => product.summ <= 0);
       if (hasInvalidSumm) {
         toast.error("Укажите сумму больше 0 для выбранных продуктов");
+        return;
+      }
+
+      const productOverBalance = products.find(
+        (product) => product.qt > getAvailableQuantity(product.id)
+      );
+      if (productOverBalance) {
+        const productName =
+          productsData?.find((product) => product.id === productOverBalance.id)
+            ?.name || "выбранного продукта";
+        toast.error(
+          `Количество для ${productName} не может быть больше остатка (${getAvailableQuantity(
+            productOverBalance.id
+          )} шт.)`
+        );
         return;
       }
 
@@ -167,19 +199,27 @@ export const SalesFormModal: React.FC<ISalesFormModalProps> = ({
     {
       title: "Количество (шт.)",
       key: "quantity",
-      render: (_: any, record: any) => (
-        <InputNumber
-          min={0}
-          value={quantities[record.id] || 0}
-          onChange={(value) => {
-            setQuantities((prev) => ({
-              ...prev,
-              [record.id]: value || 0,
-            }));
-          }}
-          style={{ width: 120 }}
-        />
-      ),
+      render: (_: any, record: any) => {
+        const maxQuantity = getAvailableQuantity(record.id);
+
+        return (
+          <InputNumber
+            min={0}
+            max={maxQuantity}
+            precision={0}
+            value={quantities[record.id] || 0}
+            onChange={(value) => {
+              const quantity = Math.min(Number(value) || 0, maxQuantity);
+              setQuantities((prev) => ({
+                ...prev,
+                [record.id]: quantity,
+              }));
+            }}
+            style={{ width: 120 }}
+            disabled={maxQuantity <= 0}
+          />
+        );
+      },
     },
     {
       title: "Сумма",
