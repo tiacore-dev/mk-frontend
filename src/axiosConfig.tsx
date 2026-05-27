@@ -2,6 +2,26 @@ import axios from "axios";
 
 export const axiosInstance = axios.create({});
 
+const LOGIN_PATH = "/client/login";
+
+let isRedirectingToLogin = false;
+
+const redirectToLoginWithReload = () => {
+  if (isRedirectingToLogin) {
+    return;
+  }
+
+  isRedirectingToLogin = true;
+  localStorage.clear();
+
+  if (window.location.pathname === LOGIN_PATH) {
+    window.location.reload();
+    return;
+  }
+
+  window.location.replace(LOGIN_PATH);
+};
+
 // Логируем заголовки и параметры запроса перед отправкой
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -43,8 +63,7 @@ axiosInstance.interceptors.response.use(
 
     // Обработка 401 ошибки
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+      redirectToLoginWithReload();
     }
 
     return Promise.reject(error);
