@@ -61,7 +61,16 @@ const App: React.FC = () => {
               <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
           </Router>
-          <Toaster />
+          <Toaster
+            toastOptions={{
+              error: {
+                style: {
+                  maxWidth: 420,
+                  padding: "12px 14px",
+                },
+              },
+            }}
+          />
         </ConfigProvider>
       </ConfigProvider>
     </QueryClientProvider>

@@ -7,6 +7,7 @@ import {
 } from "../../api/ordersApi";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
+import { formatErrorToastMessage } from "../../utils/errorToast";
 
 export const useCreateOrderMutation = () => {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ export const useCreateOrderMutation = () => {
       toast.success("Заявка успешно создана");
     },
     onError: (error: AxiosError) => {
-      toast.error("Ошибка при создании заявки");
+      toast.error(formatErrorToastMessage("Ошибка при создании заявки", error));
     },
   });
 };
@@ -33,7 +34,9 @@ export const useUpdateOrderMutation = (id: string) => {
       toast.success("Заявка успешно обновлена");
     },
     onError: (error: AxiosError) => {
-      toast.error("Ошибка при обновлении заявки");
+      toast.error(
+        formatErrorToastMessage("Ошибка при обновлении заявки", error)
+      );
     },
   });
 };

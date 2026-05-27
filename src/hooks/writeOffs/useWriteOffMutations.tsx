@@ -7,6 +7,7 @@ import {
   IWriteOffUpdateRequest,
   updateWriteOff,
 } from "../../api/writeOffsApi";
+import { formatErrorToastMessage } from "../../utils/errorToast";
 
 export const useCreateWriteOffMutation = () => {
   const queryClient = useQueryClient();
@@ -20,7 +21,9 @@ export const useCreateWriteOffMutation = () => {
       toast.success("Списание успешно создано");
     },
     onError: (error: AxiosError) => {
-      toast.error("Ошибка при создании списания");
+      toast.error(
+        formatErrorToastMessage("Ошибка при создании списания", error)
+      );
     },
   });
 };
@@ -38,7 +41,9 @@ export const useUpdateWriteOffMutation = (id: string) => {
       toast.success("Списание успешно изменено");
     },
     onError: (error: AxiosError) => {
-      toast.error("Ошибка при изменении списания");
+      toast.error(
+        formatErrorToastMessage("Ошибка при изменении списания", error)
+      );
     },
   });
 };

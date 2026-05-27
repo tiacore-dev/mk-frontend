@@ -6,6 +6,7 @@ import {
 } from "../../api/movomentsApi";
 import type { AxiosError } from "axios";
 import toast from "react-hot-toast";
+import { formatErrorToastMessage } from "../../utils/errorToast";
 
 export const useAcceptMovement = () => {
   const queryClient = useQueryClient();
@@ -21,7 +22,7 @@ export const useAcceptMovement = () => {
       toast.success("Успешно принято");
     },
     onError: (error: AxiosError) => {
-      toast.error("Ошибка при принятии");
+      toast.error(formatErrorToastMessage("Ошибка при приёмке", error));
     },
   });
 };
@@ -38,7 +39,9 @@ export const useCreateMovementMutation = () => {
       toast.success("Перемещение успешно создано");
     },
     onError: (error: AxiosError) => {
-      toast.error("Ошибка при создании перемещения");
+      toast.error(
+        formatErrorToastMessage("Ошибка при создании перемещения", error)
+      );
     },
   });
 };

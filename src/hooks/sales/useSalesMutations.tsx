@@ -7,6 +7,7 @@ import {
   IUpdateSaleRequest,
   updateSale,
 } from "../../api/salesApi";
+import { formatErrorToastMessage } from "../../utils/errorToast";
 
 export const useCreateSaleMutation = () => {
   const queryClient = useQueryClient();
@@ -18,8 +19,10 @@ export const useCreateSaleMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["balance"] });
       toast.success("Реализация успешно создана");
     },
-    onError: (_error: AxiosError) => {
-      toast.error("Ошибка при создании реализации");
+    onError: (error: AxiosError) => {
+      toast.error(
+        formatErrorToastMessage("Ошибка при создании реализации", error)
+      );
     },
   });
 };
@@ -35,8 +38,10 @@ export const useUpdateSaleMutation = (id: string) => {
       queryClient.invalidateQueries({ queryKey: ["balance"] });
       toast.success("Реализация успешно изменена");
     },
-    onError: (_error: AxiosError) => {
-      toast.error("Ошибка при изменении реализации");
+    onError: (error: AxiosError) => {
+      toast.error(
+        formatErrorToastMessage("Ошибка при изменении реализации", error)
+      );
     },
   });
 };
