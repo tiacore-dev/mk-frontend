@@ -73,7 +73,11 @@ export const ReportPage: React.FC = () => {
 
     return reportData.map((data) => {
 
-      const income = data.startBalance + data.received + data.internalReceived - data.internalSended
+      const income =
+        data.startBalance +
+        data.received +
+        data.internalReceived -
+        data.internalSended;
       const balanceRate =
         income > 0
           ? (data.endBalance / (income)) * 100
@@ -370,6 +374,21 @@ export const ReportPage: React.FC = () => {
     );
   }, [tableData]);
 
+  const totalsIncome = totals
+    ? totals.startBalance +
+      totals.received +
+      totals.internalReceived -
+      totals.internalSended
+    : 0;
+  const totalBalanceRate =
+    totals && totalsIncome > 0
+      ? Math.round((totals.endBalance / totalsIncome) * 10000) / 100
+      : 0;
+  const totalWrittenOffRate =
+    totals && totalsIncome > 0
+      ? Math.round((totals.writtenOff / totalsIncome) * 10000) / 100
+      : 0;
+
   const isLoading = isReportLoading || isProductsLoading;
   const isError = isReportError || isProductsError;
   const error = reportError || productsError;
@@ -510,20 +529,10 @@ export const ReportPage: React.FC = () => {
                       <Text strong>{totals.endBalance}</Text>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={9} align="center">
-                      <Text strong>-</Text>
+                      <Text strong>{totalBalanceRate}%</Text>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={10} align="center">
-                      <Text strong>
-                        {" "}
-                        {totals.startBalance + totals.received > 0
-                          ? Math.round(
-                              (totals.writtenOff /
-                                (totals.startBalance + totals.received)) *
-                                10000
-                            ) / 100
-                          : 0}
-                        %
-                      </Text>
+                      <Text strong>{totalWrittenOffRate}%</Text>
                     </Table.Summary.Cell>
                   </Table.Summary.Row>
                 </Table.Summary>

@@ -43,11 +43,18 @@ export const PrintReport: React.FC<PrintReportProps> = ({
       endBalance: 0,
     }
   );
+  const totalsIncome =
+    totals.startBalance +
+    totals.received +
+    totals.internalReceived -
+    totals.internalSended;
+  const totalBalanceRate =
+    totalsIncome > 0
+      ? Math.round((totals.endBalance / totalsIncome) * 10000) / 100
+      : 0;
   const totalWrittenOffRate =
-    totals.startBalance + totals.received > 0
-      ? Math.round(
-          (totals.writtenOff / (totals.startBalance + totals.received)) * 10000
-        ) / 100
+    totalsIncome > 0
+      ? Math.round((totals.writtenOff / totalsIncome) * 10000) / 100
       : 0;
 
   return (
@@ -208,7 +215,7 @@ export const PrintReport: React.FC<PrintReportProps> = ({
                 <Typography.Text strong>{totals.endBalance}</Typography.Text>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={9} align="center">
-                <Typography.Text strong>-</Typography.Text>
+                <Typography.Text strong>{totalBalanceRate}%</Typography.Text>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={10} align="center">
                 <Typography.Text strong>{totalWrittenOffRate}%</Typography.Text>
